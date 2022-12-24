@@ -8,8 +8,7 @@ import os
 import yaml
 import uuid
 import random
-import aiohttp
-import asyncio
+from logging import getLogger, StreamHandler, DEBUG
 
 load_dotenv()
 with open('config.yml', encoding='utf-8') as file:
@@ -23,6 +22,12 @@ admin_ids = config['ADMIN_IDS']
 allowed_guild_ids = config['ALLOWED_GUILD_IDS']
 default_negative_prompt = config['DEFAULT_NEGATIVE_PROMPT']
 
+logger = getLogger(__name__)
+handler = StreamHandler()
+handler.setLevel(DEBUG)
+logger.setLevel(DEBUG)
+logger.addHandler(handler)
+logger.propagate = False
 
 def save_image(binary, filename:str):
     dir = config['GENERATED_IMAGE_OUTDIR']
@@ -39,17 +44,17 @@ def parse_prompt(prompt: tuple):
 
 def log_command(ctx, image_filename):
     if(ctx.guild is None):
-        print(f'{ctx.author}({ctx.author.id}) {ctx.command} {image_filename}')
+        logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} {image_filename}')
     else:
-        print(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id}) {image_filename}')
+        logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id}) {image_filename}')
 
 def log_prompt(p, n):
-    print(f'positive_prompt: {p}')
-    print(f'negative_prompt: {n}')
+    logger.info(f'positive_prompt: {p}')
+    logger.info(f'negative_prompt: {n}')
 
 @bot.event
 async def on_ready():
-    print('We have logged in as {0.user}'.format(bot))
+    logger.info('We have logged in as {0.user}'.format(bot))
 
 if use_webui:
     # WebUIを使用する場合
