@@ -126,6 +126,19 @@ async def on_command_error(ctx, error):
         return
     raise error
 
+@bot.event
+async def on_raw_reaction_add(payload):
+    if payload.emoji.name == '🗑️':
+        channel = bot.get_channel(payload.channel_id)
+        message = await channel.fetch_message(payload.message_id)
+        if message.author == bot.user:
+            if len(message.attachments) > 0:
+                logger.info(f'{payload.member.name}({message.author.id}) delete {message.attachments[0].url}')
+                await message.delete()
+            else:
+                logger.info(f'{payload.member.name}({message.author.id}) delete {message.content}')
+                await message.delete()
+
 if use_webui:
     # WebUIを使用する場合
     ui = webui.WebUI(config['WEBUI_URI'], 'v1')
