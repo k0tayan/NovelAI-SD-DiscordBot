@@ -20,8 +20,8 @@ use_webui = config['USE_WEBUI']
 use_novelai = config['USE_NOVELAI']
 admin_ids = config['ADMIN_IDS']
 allowed_guild_ids = config['ALLOWED_GUILD_IDS']
-default_steps = config['STEPS']['DEFAULT_STEPS']
-maximum_steps = config['STEPS']['MAXIMUM_STEPS']
+default_steps = config['STEPS']['DEFAULT']
+maximum_steps = config['STEPS']['MAXIMUM']
 default_negative_prompt = config['DEFAULT_NEGATIVE_PROMPT']
 
 logger = getLogger(__name__)
