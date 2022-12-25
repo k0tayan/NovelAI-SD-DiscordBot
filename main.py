@@ -91,7 +91,7 @@ if use_webui:
     @is_nsfw()
     @bot.command(name='sd')
     async def generate_with_sd(ctx, *prompt):
-        """NSFWチャンネルのみsd [positive_prompt] -u [negative_prompt]"""
+        """NSFWチャンネルのみ sd [positive_prompt] -u [negative_prompt]"""
 
         try:
             positive_prompt, negative_prompt = parse_prompt(prompt)
