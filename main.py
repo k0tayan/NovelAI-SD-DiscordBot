@@ -9,6 +9,7 @@ import yaml
 import uuid
 import random
 from logging import getLogger, StreamHandler, DEBUG
+from collections.abc import Callable
 
 load_dotenv()
 with open('config.yml', encoding='utf-8') as file:
@@ -34,39 +35,46 @@ def save_image(binary, filename:str):
     with open(f'{dir}/{filename}.jpg', 'wb') as f:
         f.write(binary)
 
-def parse_prompt(prompt: tuple) -> list[str, str, int, int]:
+def parse_option(prompt: list, option: str, default: int, max: int, f: Callable=None, error: ValueError=None) -> int:
+    if option in prompt:
+        index = prompt.index(option)
+        if index >= len(prompt)-1 or not prompt[index+1].isdecimal():
+            raise ValueError(f"{option}が不正です。")
+        if int(prompt[index+1]) < 1 or int(prompt[index+1]) > max:
+            raise ValueError(f"{option}は1~{max}の間で指定してください。")
+        value = int(prompt[index+1])
+        if f is not None:
+            result = f(value)
+            if result:
+                prompt.pop(index) # optionの分を削除(-option)
+                prompt.pop(index) # optionの分を削除(数値)
+            else:
+                raise error
+    else:
+        value = default
+    return value
+
+def parse_prompt(prompt: tuple) -> dict:
     prompt = list(prompt)
-    # stepsの処理
-    steps_index = (lambda x : x.index('-s') if '-s' in x else -1)(prompt)
-    if steps_index != -1:
-        if steps_index >= len(prompt)-1 or not prompt[steps_index+1].isdecimal():
-            raise ValueError("stepsが不正です。")
-        if int(prompt[steps_index+1]) < 1 or int(prompt[steps_index+1]) > config['STEPS']['MAXIMUM']:
-            raise ValueError(f"stepsは1~{config['STEPS']['MAXIMUM']}の間で指定してください。")
-        steps = int(prompt[steps_index+1])
-        prompt.pop(steps_index) # stepの分を削除(-step)
-        prompt.pop(steps_index) # stepの分を削除(数値)
-    else:
-        steps = config['STEPS']['DEFAULT']
-    # scaleの処理
-    scale_index = (lambda x : x.index('-c') if '-c' in x else -1)(prompt)
-    if scale_index != -1:
-        if scale_index >= len(prompt)-1 or not prompt[scale_index+1].isdecimal():
-            raise ValueError("scaleが不正です。")
-        if int(prompt[scale_index+1]) < 1 or int(prompt[scale_index+1]) > config['SCALE']['MAXIMUM']:
-            raise ValueError(f"scaleは1~{config['SCALE']['MAXIMUM']}の間で指定してください。")
-        scale = int(prompt[scale_index+1])
-        prompt.pop(scale_index) # scaleの分を削除(-c)
-        prompt.pop(scale_index) # scaleの分を削除(数値)
-    else:
-        scale = config['SCALE']['DEFAULT']
+    scale = parse_option(prompt, '-c', config['SCALE']['DEFAULT'], config['SCALE']['MAXIMUM'])
+    steps = parse_option(prompt, '-s', config['STEPS']['DEFAULT'], config['STEPS']['MAXIMUM'])
+    width = parse_option(prompt, '-w', config['SIZE']['WIDTH']['DEFAULT'], config['SIZE']['WIDTH']['MAXIMUM'], lambda x : x % 64 == 0, ValueError("widthは64の倍数で指定してください。"))
+    height = parse_option(prompt, '-h', config['SIZE']['HEIGHT']['DEFAULT'], config['SIZE']['HEIGHT']['MAXIMUM'], lambda x : x % 64 == 0, ValueError("heightは64の倍数で指定してください。"))
     # negative_promptの処理
     n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:
         raise ValueError("パラメーターが不正です。")
     negative_prompt = ' '.join("" if n == -1 else prompt[n+1:])
     positive_prompt = ' '.join(prompt if n == -1 else prompt[:n])
-    return positive_prompt, negative_prompt, steps, scale
+    response = {
+        'positive_prompt': positive_prompt,
+        'negative_prompt': negative_prompt,
+        'steps': steps,
+        'scale': scale,
+        'width': width,
+        'height': height
+    }
+    return response
 
 def log_command(ctx, image_filename):
     if(ctx.guild is None):
@@ -74,15 +82,13 @@ def log_command(ctx, image_filename):
     else:
         logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id}) {image_filename}')
 
-def log_prompt(p, n):
-    logger.info(f'positive_prompt: {p}')
-    logger.info(f'negative_prompt: {n}')
-
-def log_steps(s):
-    logger.info(f'steps: {s}')
-
-def log_scale(s):
-    logger.info(f'scale: {s}')
+def log_prompt(prompt: dict):
+    logger.info(f'positive_prompt: {prompt["positive_prompt"]}')
+    logger.info(f'negative_prompt: {prompt["negative_prompt"]}')
+    logger.info(f'steps: {prompt["steps"]}')
+    logger.info(f'scale: {prompt["scale"]}')
+    logger.info(f'width: {prompt["width"]}')
+    logger.info(f'height: {prompt["height"]}')
 
 def bypass_admin(func):
     def predicate(ctx):
@@ -133,24 +139,22 @@ if use_webui:
         """NSFWチャンネルのみ sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale]"""
 
         try:
-            positive_prompt, negative_prompt, steps, scale = parse_prompt(prompt)
+            args = parse_prompt(prompt)
         except ValueError as e:
             await ctx.reply(e)
             return
         reply_message = random.choice(config["MESSAGE"]["RESPONSE"])
-        if steps != config['STEPS']['DEFAULT']:
-            reply_message += '\n' + random.choice(config["MESSAGE"]["STEPS"]).replace("<0>", str(steps))
+        if args["steps"] != config['STEPS']['DEFAULT']:
+            reply_message += '\n' + random.choice(config["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
         await ctx.reply(reply_message)
         response = await ui.generate_image(
-            positive_prompt, (512, 768), default_negative_prompt+negative_prompt, steps=steps, scale=scale)
+            args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"])
         b64_image = response["images"][0]
         image_data = base64.b64decode(b64_image)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
-        log_prompt(positive_prompt, negative_prompt)
-        log_steps(steps)
-        log_scale(scale)
+        log_prompt(args)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         await ctx.reply(file=file)
 
@@ -164,16 +168,16 @@ if use_novelai:
         """SFWな画像を生成します sfw [positive_prompt] -u [negative_prompt]"""
 
         try:
-            positive_prompt, negative_prompt, _, _ = parse_prompt(prompt)
+            args = parse_prompt(prompt)
         except ValueError as e:
             await ctx.reply(e)
             return
         await ctx.reply(random.choice(config["MESSAGE"]["RESPONSE"]))
-        image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, True)
+        image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], True)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
-        log_prompt(positive_prompt, negative_prompt)
+        log_prompt(args)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         await ctx.reply(file=file)
     
@@ -184,16 +188,16 @@ if use_novelai:
         """NSFWチャンネルのみ nsfw [positive_prompt] -u [negative_prompt]"""
 
         try:
-            positive_prompt, negative_prompt, _, _ = parse_prompt(prompt)
+            args = parse_prompt(prompt)
         except ValueError as e:
             await ctx.reply(e)
             return
         await ctx.reply(random.choice(config["MESSAGE"]["RESPONSE"]))
-        image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, False)
+        image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], False)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
-        log_prompt(positive_prompt, negative_prompt)
+        log_prompt(args)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         await ctx.reply(file=file)
 
