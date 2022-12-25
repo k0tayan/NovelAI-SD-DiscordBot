@@ -84,6 +84,13 @@ def is_nsfw():
 async def on_ready():
     logger.info('We have logged in as {0.user}'.format(bot))
 
+# コマンドが存在しない場合にエラーを出さない
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        return
+    raise error
+
 if use_webui:
     # WebUIを使用する場合
     ui = webui.WebUI(config['WEBUI_URI'], 'v1')
