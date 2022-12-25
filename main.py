@@ -60,6 +60,7 @@ def parse_prompt(prompt: tuple) -> dict:
     steps = parse_option(prompt, '-s', config['STEPS']['DEFAULT'], config['STEPS']['MAXIMUM'])
     width = parse_option(prompt, '-w', config['SIZE']['WIDTH']['DEFAULT'], config['SIZE']['WIDTH']['MAXIMUM'], lambda x : x % 64 == 0, ValueError("widthは64の倍数で指定してください。"))
     height = parse_option(prompt, '-h', config['SIZE']['HEIGHT']['DEFAULT'], config['SIZE']['HEIGHT']['MAXIMUM'], lambda x : x % 64 == 0, ValueError("heightは64の倍数で指定してください。"))
+    batch_size = parse_option(prompt, '-b', config['BATCH_SIZE']['DEFAULT'], config['BATCH_SIZE']['MAXIMUM'])
     # negative_promptの処理
     n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:
@@ -72,7 +73,8 @@ def parse_prompt(prompt: tuple) -> dict:
         'steps': steps,
         'scale': scale,
         'width': width,
-        'height': height
+        'height': height,
+        'batch_size': batch_size
     }
     return response
 
@@ -83,12 +85,7 @@ def log_command(ctx, image_filename):
         logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id}) {image_filename}')
 
 def log_prompt(prompt: dict):
-    logger.info(f'positive_prompt: {prompt["positive_prompt"]}')
-    logger.info(f'negative_prompt: {prompt["negative_prompt"]}')
-    logger.info(f'steps: {prompt["steps"]}')
-    logger.info(f'scale: {prompt["scale"]}')
-    logger.info(f'width: {prompt["width"]}')
-    logger.info(f'height: {prompt["height"]}')
+    print(prompt)
 
 def bypass_admin(func):
     def predicate(ctx):
@@ -146,17 +143,30 @@ if use_webui:
         reply_message = random.choice(config["MESSAGE"]["RESPONSE"])
         if args["steps"] != config['STEPS']['DEFAULT']:
             reply_message += '\n' + random.choice(config["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
-        await ctx.reply(reply_message)
-        response = await ui.generate_image(
-            args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"])
-        b64_image = response["images"][0]
-        image_data = base64.b64decode(b64_image)
-        image_filename = str(uuid.uuid4())
+        if args['batch_size'] == 1:
+            await ctx.reply(reply_message)
+            response = await ui.generate_image(
+                args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"])
+            b64_image = response["images"][0]
+            image_data = base64.b64decode(b64_image)
+            image_filename = str(uuid.uuid4())
+            file = discord.File(io.BytesIO(image_data), filename="image.jpg")
+            await ctx.reply(file=file)
+        else:
+            thread = await ctx.message.create_thread(name=",".join(prompt)[:255])
+            await thread.send(reply_message)
+            response = await ui.generate_image(
+                args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"], batch_size=args['batch_size'])
+            for image in response["images"]:
+                b64_image = image
+                image_data = base64.b64decode(b64_image)
+                image_filename = str(uuid.uuid4())
+                logger.info(f"Generated image: {image_filename}")
+                file = discord.File(io.BytesIO(image_data), filename="image.jpg")
+                await thread.send(file=file)
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(args)
-        file = discord.File(io.BytesIO(image_data), filename="image.jpg")
-        await ctx.reply(file=file)
 
 if use_novelai:
     # NovelAIを使用する

@@ -18,6 +18,9 @@ SIZE:
   HEIGHT:
     DEFAULT: 768
     MAXIMUM: 1024
+BATCH_SIZE:
+  DEFAULT: 1
+  MAXIMUM: 4
 MESSAGE:
   RESPONSE:
     - 画像を生成しています
