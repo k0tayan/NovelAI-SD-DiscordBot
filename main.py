@@ -15,7 +15,7 @@ with open('config.yml', encoding='utf-8') as file:
     config = yaml.safe_load(file)
 
 bot = commands.Bot(command_prefix='', intents=discord.Intents.all())
-nai = novelai.NovelAI()
+
 use_webui = config['USE_WEBUI']
 use_novelai = config['USE_NOVELAI']
 admin_ids = config['ADMIN_IDS']
@@ -119,6 +119,8 @@ if use_webui:
 
 if use_novelai:
     # NovelAIを使用する
+    nai = novelai.NovelAI()
+    
     @is_allowed_guild()
     @bot.command(name='sfw')
     async def generate_with_nai(ctx, *prompt):
