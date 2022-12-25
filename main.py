@@ -133,7 +133,7 @@ if use_webui:
     @is_nsfw()
     @bot.command(name='sd')
     async def generate_with_sd(ctx, *prompt):
-        """sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height]"""
+        """sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size]"""
 
         try:
             args = parse_prompt(prompt)
