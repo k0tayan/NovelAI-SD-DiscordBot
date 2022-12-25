@@ -14,7 +14,7 @@ load_dotenv()
 with open('config.yml', encoding='utf-8') as file:
     config = yaml.safe_load(file)
 
-bot = commands.Bot(command_prefix='nai ', intents=discord.Intents.all())
+bot = commands.Bot(command_prefix='', intents=discord.Intents.all())
 nai = novelai.NovelAI()
 use_webui = config['USE_WEBUI']
 use_novelai = config['USE_NOVELAI']
