@@ -201,5 +201,38 @@ if use_novelai:
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         await ctx.reply(file=file)
 
+@bot.event
+async def on_message(message):
+    if message.content.startswith('https://discord.com/channels/') or \
+        message.content.startswith('https://discordapp.com/channels/') or \
+            message.content.startswith('https://canary.discord.com/channels/') or \
+                message.content.startswith('https://ptb.discord.com/channels/'):
+        # メッセージがリンクの場合
+        if use_webui:
+            # WebUIを使用する場合
+            server_id, channel_id, message_id = message.content.split('/')[-3:]
+            server = bot.get_guild(int(server_id))
+            channel = server.get_channel(int(channel_id))
+            linked_message = await channel.fetch_message(int(message_id))
+            linked_message_content = linked_message.content
+            print(linked_message_content)
+            # 取得したメッセージに対して返信する
+            if message.author != bot.user and linked_message_content != "" and message.channel.is_nsfw():
+                # 自分自身の発言ではない、メッセージが空でない、NSFWチャンネルである場合
+                message_text = random.choice(config['MESSAGE']['LINK']) + '\n' + linked_message_content
+                await message.reply(message_text)
+                response = await ui.generate_image(
+                    linked_message_content, (512, 768), default_negative_prompt, steps=config['STEPS']['DEFAULT'], scale=config['SCALE']['DEFAULT'])
+                b64_image = response["images"][0]
+                image_data = base64.b64decode(b64_image)
+                image_filename = str(uuid.uuid4())
+                save_image(image_data, image_filename)
+                logger.info(f"Prompt from {message.author}: {linked_message_content}")
+                logger.info(f"Generated image: {image_filename}")
+                file = discord.File(io.BytesIO(image_data), filename="image.jpg")
+                await message.reply(file=file)
+    else:
+        await bot.process_commands(message)
+
 if __name__ == '__main__':
     bot.run(os.getenv('DISCORD_TOKEN'))
