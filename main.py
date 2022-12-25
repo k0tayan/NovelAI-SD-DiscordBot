@@ -20,6 +20,8 @@ use_webui = config['USE_WEBUI']
 use_novelai = config['USE_NOVELAI']
 admin_ids = config['ADMIN_IDS']
 allowed_guild_ids = config['ALLOWED_GUILD_IDS']
+default_steps = config['STEPS']['DEFAULT_STEPS']
+maximum_steps = config['STEPS']['MAXIMUM_STEPS']
 default_negative_prompt = config['DEFAULT_NEGATIVE_PROMPT']
 
 logger = getLogger(__name__)
@@ -34,13 +36,28 @@ def save_image(binary, filename:str):
     with open(f'{dir}/{filename}.jpg', 'wb') as f:
         f.write(binary)
 
-def parse_prompt(prompt: tuple):
+def parse_prompt(prompt: tuple) -> list[str, str, int]:
+    prompt = list(prompt)
+    # stepsの処理
+    steps_index = (lambda x : x.index('-steps') if '-steps' in x else -1)(prompt)
+    if steps_index != -1:
+        if steps_index >= len(prompt)-1 or not prompt[steps_index+1].isdecimal():
+            raise ValueError("stepsが不正です。")
+        if int(prompt[steps_index+1]) < 1 or int(prompt[steps_index+1]) > maximum_steps:
+            raise ValueError(f"stepsは1~{maximum_steps}の間で指定してください。")
+        steps = int(prompt[steps_index+1])
+        prompt.pop(steps_index) # stepの分を削除(-step)
+        prompt.pop(steps_index) # stepの分を削除(数値)
+    else:
+        steps = default_steps
+    # negative_promptの処理
     n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:
         raise ValueError("パラメーターが不正です。")
     negative_prompt = ' '.join("" if n == -1 else prompt[n+1:])
     positive_prompt = ' '.join(prompt if n == -1 else prompt[:n])
-    return positive_prompt, negative_prompt
+    print(positive_prompt, negative_prompt, steps)
+    return positive_prompt, negative_prompt, steps
 
 def log_command(ctx, image_filename):
     if(ctx.guild is None):
@@ -101,13 +118,16 @@ if use_webui:
         """NSFWチャンネルのみ sd [positive_prompt] -u [negative_prompt]"""
 
         try:
-            positive_prompt, negative_prompt = parse_prompt(prompt)
+            positive_prompt, negative_prompt, steps = parse_prompt(prompt)
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(config["RESPONSE_MESSAGE"]))
+        reply_message = random.choice(config["RESPONSE_MESSAGE"])
+        if steps != default_steps:
+            reply_message += '\n' + random.choice(config["STEPS_MESSAGE"]).replace("<0>", str(steps))
+        await ctx.reply(reply_message)
         response = await ui.generate_image(
-            positive_prompt, (512, 768), default_negative_prompt+negative_prompt, steps=20)
+            positive_prompt, (512, 768), default_negative_prompt+negative_prompt, steps=steps)
         b64_image = response["images"][0]
         image_data = base64.b64decode(b64_image)
         image_filename = str(uuid.uuid4())
@@ -127,7 +147,7 @@ if use_novelai:
         """SFWな画像を生成します sfw [positive_prompt] -u [negative_prompt]"""
 
         try:
-            positive_prompt, negative_prompt = parse_prompt(prompt)
+            positive_prompt, negative_prompt, _ = parse_prompt(prompt)
         except ValueError as e:
             await ctx.reply(e)
             return
@@ -147,7 +167,7 @@ if use_novelai:
         """NSFWチャンネルのみ nsfw [positive_prompt] -u [negative_prompt]"""
 
         try:
-            positive_prompt, negative_prompt = parse_prompt(prompt)
+            positive_prompt, negative_prompt, _ = parse_prompt(prompt)
         except ValueError as e:
             await ctx.reply(e)
             return

@@ -2,9 +2,14 @@ USE_WEBUI: True
 USE_NOVELAI: True
 WEBUI_URI: http://localhost:15000
 GENERATED_IMAGE_OUTDIR: generated_files
-DEFAULT_NEGATIVE_PROMPT: lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry
 ADMIN_IDS: []
 ALLOWED_GUILD_IDS: []
+DEFAULT_NEGATIVE_PROMPT: lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry
+STEPS:
+  DEFAULT_STEPS: 20
+  MAXIMUM_STEPS: 30
 RESPONSE_MESSAGE:
   - 画像を生成しています
   - ちょっと待っててね
+STEPS_MESSAGE:
+  - <0>ステップで作成しています
