@@ -138,7 +138,7 @@ if use_webui:
             await ctx.reply(e)
             return
         reply_message = random.choice(config["MESSAGE"]["RESPONSE"])
-        if steps != default_steps:
+        if steps != config['STEPS']['DEFAULT']:
             reply_message += '\n' + random.choice(config["MESSAGE"]["STEPS"]).replace("<0>", str(steps))
         await ctx.reply(reply_message)
         response = await ui.generate_image(
