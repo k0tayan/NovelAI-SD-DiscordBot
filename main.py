@@ -157,8 +157,7 @@ if use_webui:
             await thread.send(reply_message)
             response = await ui.generate_image(
                 args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"], batch_size=args['batch_size'])
-            for image in response["images"]:
-                b64_image = image
+            for b64_image in response["images"]:
                 image_data = base64.b64decode(b64_image)
                 image_filename = str(uuid.uuid4())
                 logger.info(f"Generated image: {image_filename}")
