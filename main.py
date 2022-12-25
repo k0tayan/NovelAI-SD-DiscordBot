@@ -39,7 +39,7 @@ def save_image(binary, filename:str):
 def parse_prompt(prompt: tuple) -> list[str, str, int]:
     prompt = list(prompt)
     # stepsの処理
-    steps_index = (lambda x : x.index('-steps') if '-steps' in x else -1)(prompt)
+    steps_index = (lambda x : x.index('-s') if '-s' in x else -1)(prompt)
     if steps_index != -1:
         if steps_index >= len(prompt)-1 or not prompt[steps_index+1].isdecimal():
             raise ValueError("stepsが不正です。")
@@ -115,7 +115,7 @@ if use_webui:
     @is_nsfw()
     @bot.command(name='sd')
     async def generate_with_sd(ctx, *prompt):
-        """NSFWチャンネルのみ sd [positive_prompt] -u [negative_prompt]"""
+        """NSFWチャンネルのみ sd [positive_prompt] -u [negative_prompt] -s [steps]"""
 
         try:
             positive_prompt, negative_prompt, steps = parse_prompt(prompt)
