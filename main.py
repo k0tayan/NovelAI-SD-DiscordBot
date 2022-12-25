@@ -55,13 +55,13 @@ def parse_prompt(prompt: tuple) -> list[str, str, int, int]:
     if scale_index != -1:
         if scale_index >= len(prompt)-1 or not prompt[scale_index+1].isdecimal():
             raise ValueError("scaleが不正です。")
-        if int(prompt[scale_index+1]) < 1 or int(prompt[scale_index+1]) > 10:
-            raise ValueError("scaleは1~10の間で指定してください。")
+        if int(prompt[scale_index+1]) < 1 or int(prompt[scale_index+1]) > config['SCALE']['MAXIMUM']:
+            raise ValueError(f"scaleは1~{config['SCALE']['MAXIMUM']}の間で指定してください。")
         scale = int(prompt[scale_index+1])
         prompt.pop(scale_index) # scaleの分を削除(-c)
         prompt.pop(scale_index) # scaleの分を削除(数値)
     else:
-        scale = 12
+        scale = config['SCALE']['DEFAULT']
     # negative_promptの処理
     n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:

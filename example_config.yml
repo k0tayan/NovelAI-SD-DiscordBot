@@ -8,6 +8,9 @@ DEFAULT_NEGATIVE_PROMPT: lowres, bad anatomy, bad hands, text, error, missing fi
 STEPS:
   DEFAULT: 20
   MAXIMUM: 30
+SCALE:
+  DEFAULT: 11
+  MAXIMUM: 20
 MESSAGE:
   RESPONSE:
     - 画像を生成しています
