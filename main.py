@@ -153,8 +153,11 @@ if use_webui:
             file = discord.File(io.BytesIO(image_data), filename="image.jpg")
             await ctx.reply(file=file)
         else:
-            thread = await ctx.message.create_thread(name=" ".join(prompt)[:100])
-            await thread.send(reply_message)
+            if type(ctx.message.channel) is discord.channel.TextChannel:
+                thread = await ctx.message.create_thread(name=" ".join(prompt)[:100])
+                await thread.send(reply_message)
+            else:
+                await ctx.reply(reply_message)
             response = await ui.generate_image(
                 args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"], batch_size=args['batch_size'])
             for b64_image in response["images"]:
@@ -162,7 +165,10 @@ if use_webui:
                 image_filename = str(uuid.uuid4())
                 logger.info(f"Generated image: {image_filename}")
                 file = discord.File(io.BytesIO(image_data), filename="image.jpg")
-                await thread.send(file=file)
+                if type(ctx.message.channel) is discord.channel.TextChannel:
+                    await thread.send(file=file)
+                else:
+                    await ctx.reply(file=file)                    
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(args)
