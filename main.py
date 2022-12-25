@@ -52,6 +52,34 @@ def log_prompt(p, n):
     logger.info(f'positive_prompt: {p}')
     logger.info(f'negative_prompt: {n}')
 
+def bypass_admin(func):
+    def predicate(ctx):
+        if ctx.author.id in admin_ids:
+            return True
+        return func(ctx)
+    return predicate
+
+def is_allowed_guild():
+    @bypass_admin
+    async def predicate(ctx):
+        if ctx.guild is None:
+            await ctx.send("このコマンドはサーバー内でのみ使用できます。")
+            return False
+        if ctx.guild.id in allowed_guild_ids:
+            return True
+        await ctx.send("このコマンドはこのサーバーで使用できません。")
+        return False
+    return commands.check(predicate)
+
+def is_nsfw():
+    @bypass_admin
+    async def predicate(ctx):
+        if ctx.guild is not None and ctx.channel.is_nsfw():
+            return True
+        await ctx.send("このコマンドはNSFWチャンネルでのみ使用できます。")
+        return False
+    return commands.check(predicate)
+
 @bot.event
 async def on_ready():
     logger.info('We have logged in as {0.user}'.format(bot))
@@ -59,24 +87,18 @@ async def on_ready():
 if use_webui:
     # WebUIを使用する場合
     ui = webui.WebUI(config['WEBUI_URI'], 'v1')
+    @is_allowed_guild()
+    @is_nsfw()
     @bot.command(name='sd')
     async def generate_with_sd(ctx, *prompt):
         """NSFWチャンネルのみsd [positive_prompt] -u [negative_prompt]"""
-        if ctx.author.id not in admin_ids:
-            # サーバー内でのみ使用可能
-            if ctx.guild is None:
-                await ctx.send("このコマンドは紫式部サーバー内でのみ使用できます。")
-                return
-            # サーバーが許可されているかどうかを確認
-            if ctx.guild.id not in allowed_guild_ids:
-                await ctx.send("このコマンドはこのサーバーで使用できません。")
-                return
-            # チャンネルがNSFWチャンネルかどうかを確認
-            if not ctx.channel.is_nsfw():
-                await ctx.send("このコマンドはNSFWチャンネルでのみ使用できます。")
-                return
+
+        try:
+            positive_prompt, negative_prompt = parse_prompt(prompt)
+        except ValueError as e:
+            await ctx.send(e)
+            return
         await ctx.send(random.choice(config["RESPONSE_MESSAGE"]))
-        positive_prompt, negative_prompt = parse_prompt(prompt)
         response = await ui.generate_image(
             positive_prompt, (512, 768), default_negative_prompt+negative_prompt, steps=20)
         b64_image = response["images"][0]
@@ -90,20 +112,17 @@ if use_webui:
 
 if use_novelai:
     # NovelAIを使用する
+    @is_allowed_guild()
     @bot.command(name='sfw')
     async def generate_with_nai(ctx, *prompt):
         """SFWな画像を生成します sfw [positive_prompt] -u [negative_prompt]"""
-        if ctx.author.id not in admin_ids:
-            # サーバー内でのみ使用可能
-            if ctx.guild is None:
-                await ctx.send("このコマンドは紫式部サーバー内でのみ使用できます。")
-                return
-            # サーバーが許可されているかどうかを確認
-            if ctx.guild.id not in allowed_guild_ids:
-                await ctx.send("このコマンドはこのサーバーで使用できません。")
-                return
+
+        try:
+            positive_prompt, negative_prompt = parse_prompt(prompt)
+        except ValueError as e:
+            await ctx.send(e)
+            return
         await ctx.send(random.choice(config["RESPONSE_MESSAGE"]))
-        positive_prompt, negative_prompt = parse_prompt(prompt)
         image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, True)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
@@ -111,25 +130,19 @@ if use_novelai:
         log_prompt(positive_prompt, negative_prompt)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         await ctx.send(file=file)
-
+    
+    @is_allowed_guild()
+    @is_nsfw()
     @bot.command(name='nsfw')
     async def generate_with_nai(ctx, *prompt):
         """NSFWチャンネルのみ nsfw [positive_prompt] -u [negative_prompt]"""
-        if ctx.author.id not in admin_ids:
-            # サーバー内でのみ使用可能
-            if ctx.guild is None:
-                await ctx.send("このコマンドは紫式部サーバー内でのみ使用できます。")
-                return
-            # サーバーが許可されているかどうかを確認
-            if ctx.guild.id not in allowed_guild_ids:
-                await ctx.send("このコマンドはこのサーバーで使用できません。")
-                return
-            # チャンネルがNSFWチャンネルかどうかを確認
-            if not ctx.channel.is_nsfw():
-                await ctx.send("このコマンドはNSFWチャンネルでのみ使用できます。")
-                return
+
+        try:
+            positive_prompt, negative_prompt = parse_prompt(prompt)
+        except ValueError as e:
+            await ctx.send(e)
+            return
         await ctx.send(random.choice(config["RESPONSE_MESSAGE"]))
-        positive_prompt, negative_prompt = parse_prompt(prompt)
         image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, False)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
