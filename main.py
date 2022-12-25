@@ -153,7 +153,7 @@ if use_webui:
             file = discord.File(io.BytesIO(image_data), filename="image.jpg")
             await ctx.reply(file=file)
         else:
-            thread = await ctx.message.create_thread(name=" ".join(prompt)[:255])
+            thread = await ctx.message.create_thread(name=" ".join(prompt)[:100])
             await thread.send(reply_message)
             response = await ui.generate_image(
                 args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"], batch_size=args['batch_size'])
