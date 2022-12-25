@@ -63,11 +63,11 @@ def is_allowed_guild():
     @bypass_admin
     async def predicate(ctx):
         if ctx.guild is None:
-            await ctx.send("このコマンドはサーバー内でのみ使用できます。")
+            await ctx.reply("このコマンドはサーバー内でのみ使用できます。")
             return False
         if ctx.guild.id in allowed_guild_ids:
             return True
-        await ctx.send("このコマンドはこのサーバーで使用できません。")
+        await ctx.reply("このコマンドはこのサーバーで使用できません。")
         return False
     return commands.check(predicate)
 
@@ -76,7 +76,7 @@ def is_nsfw():
     async def predicate(ctx):
         if ctx.guild is not None and ctx.channel.is_nsfw():
             return True
-        await ctx.send("このコマンドはNSFWチャンネルでのみ使用できます。")
+        await ctx.reply("このコマンドはNSFWチャンネルでのみ使用できます。")
         return False
     return commands.check(predicate)
 
@@ -103,9 +103,9 @@ if use_webui:
         try:
             positive_prompt, negative_prompt = parse_prompt(prompt)
         except ValueError as e:
-            await ctx.send(e)
+            await ctx.reply(e)
             return
-        await ctx.send(random.choice(config["RESPONSE_MESSAGE"]))
+        await ctx.reply(random.choice(config["RESPONSE_MESSAGE"]))
         response = await ui.generate_image(
             positive_prompt, (512, 768), default_negative_prompt+negative_prompt, steps=20)
         b64_image = response["images"][0]
@@ -115,12 +115,12 @@ if use_webui:
         log_command(ctx, image_filename)
         log_prompt(positive_prompt, negative_prompt)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
-        await ctx.send(file=file)
+        await ctx.reply(file=file)
 
 if use_novelai:
     # NovelAIを使用する
     nai = novelai.NovelAI()
-    
+
     @is_allowed_guild()
     @bot.command(name='sfw')
     async def generate_with_nai(ctx, *prompt):
@@ -129,16 +129,16 @@ if use_novelai:
         try:
             positive_prompt, negative_prompt = parse_prompt(prompt)
         except ValueError as e:
-            await ctx.send(e)
+            await ctx.reply(e)
             return
-        await ctx.send(random.choice(config["RESPONSE_MESSAGE"]))
+        await ctx.reply(random.choice(config["RESPONSE_MESSAGE"]))
         image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, True)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(positive_prompt, negative_prompt)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
-        await ctx.send(file=file)
+        await ctx.reply(file=file)
     
     @is_allowed_guild()
     @is_nsfw()
@@ -149,16 +149,16 @@ if use_novelai:
         try:
             positive_prompt, negative_prompt = parse_prompt(prompt)
         except ValueError as e:
-            await ctx.send(e)
+            await ctx.reply(e)
             return
-        await ctx.send(random.choice(config["RESPONSE_MESSAGE"]))
+        await ctx.reply(random.choice(config["RESPONSE_MESSAGE"]))
         image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, False)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(positive_prompt, negative_prompt)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
-        await ctx.send(file=file)
+        await ctx.reply(file=file)
 
 if __name__ == '__main__':
     bot.run(os.getenv('DISCORD_TOKEN'))
