@@ -20,8 +20,6 @@ use_webui = config['USE_WEBUI']
 use_novelai = config['USE_NOVELAI']
 admin_ids = config['ADMIN_IDS']
 allowed_guild_ids = config['ALLOWED_GUILD_IDS']
-default_steps = config['STEPS']['DEFAULT']
-maximum_steps = config['STEPS']['MAXIMUM']
 default_negative_prompt = config['DEFAULT_NEGATIVE_PROMPT']
 
 logger = getLogger(__name__)
@@ -43,13 +41,13 @@ def parse_prompt(prompt: tuple) -> list[str, str, int, int]:
     if steps_index != -1:
         if steps_index >= len(prompt)-1 or not prompt[steps_index+1].isdecimal():
             raise ValueError("stepsが不正です。")
-        if int(prompt[steps_index+1]) < 1 or int(prompt[steps_index+1]) > maximum_steps:
-            raise ValueError(f"stepsは1~{maximum_steps}の間で指定してください。")
+        if int(prompt[steps_index+1]) < 1 or int(prompt[steps_index+1]) > config['STEPS']['MAXIMUM']:
+            raise ValueError(f"stepsは1~{config['STEPS']['MAXIMUM']}の間で指定してください。")
         steps = int(prompt[steps_index+1])
         prompt.pop(steps_index) # stepの分を削除(-step)
         prompt.pop(steps_index) # stepの分を削除(数値)
     else:
-        steps = default_steps
+        steps = config['STEPS']['DEFAULT']
     # scaleの処理
     scale_index = (lambda x : x.index('-c') if '-c' in x else -1)(prompt)
     if scale_index != -1:
