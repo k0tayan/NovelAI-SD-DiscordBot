@@ -80,6 +80,12 @@ def log_prompt(p, n):
     logger.info(f'positive_prompt: {p}')
     logger.info(f'negative_prompt: {n}')
 
+def log_steps(s):
+    logger.info(f'steps: {s}')
+
+def log_scale(s):
+    logger.info(f'scale: {s}')
+
 def bypass_admin(func):
     def predicate(ctx):
         if ctx.author.id in admin_ids:
@@ -145,6 +151,8 @@ if use_webui:
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(positive_prompt, negative_prompt)
+        log_steps(steps)
+        log_scale(scale)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         await ctx.reply(file=file)
 
