@@ -8,8 +8,9 @@ DEFAULT_NEGATIVE_PROMPT: lowres, bad anatomy, bad hands, text, error, missing fi
 STEPS:
   DEFAULT_STEPS: 20
   MAXIMUM_STEPS: 30
-RESPONSE_MESSAGE:
-  - 画像を生成しています
-  - ちょっと待っててね
-STEPS_MESSAGE:
-  - <0>ステップで作成しています
+MESSAGE:
+  RESPONSE:
+    - 画像を生成しています
+    - ちょっと待っててね
+  STEPS:
+    - <0>ステップで作成しています

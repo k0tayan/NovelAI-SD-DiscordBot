@@ -122,9 +122,9 @@ if use_webui:
         except ValueError as e:
             await ctx.reply(e)
             return
-        reply_message = random.choice(config["RESPONSE_MESSAGE"])
+        reply_message = random.choice(config["MESSAGE"]["RESPONSE"])
         if steps != default_steps:
-            reply_message += '\n' + random.choice(config["STEPS_MESSAGE"]).replace("<0>", str(steps))
+            reply_message += '\n' + random.choice(config["MESSAGE"]["STEPS"]).replace("<0>", str(steps))
         await ctx.reply(reply_message)
         response = await ui.generate_image(
             positive_prompt, (512, 768), default_negative_prompt+negative_prompt, steps=steps)
@@ -151,7 +151,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(config["RESPONSE_MESSAGE"]))
+        await ctx.reply(random.choice(config["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, True)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
@@ -171,7 +171,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(config["RESPONSE_MESSAGE"]))
+        await ctx.reply(random.choice(config["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(positive_prompt, (512, 768), negative_prompt, False)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
