@@ -10,6 +10,7 @@ import uuid
 import random
 from logging import getLogger, StreamHandler, DEBUG
 from collections.abc import Callable
+import json
 
 load_dotenv()
 with open('config.yml', encoding='utf-8') as file:
@@ -29,6 +30,8 @@ handler.setLevel(DEBUG)
 logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.propagate = False
+
+elemental_code_jsons = [config['ELEMENTAL_CODE_JSON_PATH'] + '/' + i for i in os.listdir(config['ELEMENTAL_CODE_JSON_PATH'])]
 
 def save_image(binary, filename:str):
     dir = config['GENERATED_IMAGE_OUTDIR']
@@ -189,6 +192,36 @@ if use_webui:
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(args)
+    
+    @bot.command(name='ele')
+    async def generate_with_ele(ctx):
+        json_path = random.choice(elemental_code_jsons)
+        with open(json_path, 'r', encoding='utf-8') as f:
+            json_data = json.load(f)
+        positive_prompt = json_data['prompt'].replace('{', '(').replace('}', ')')
+        negative_prompt = json_data["negative_prompt"].replace('{', '(').replace('}', ')')
+        reply_message = random.choice(config["MESSAGE"]["ELEMENTAL_CODE"])
+        reply_message += '\n sd ' + positive_prompt + '\n -u ' + negative_prompt
+        await ctx.reply(reply_message)
+        if 'width' not in json_data:
+            json_data['width'] = config['WIDTH']['DEFAULT']
+        if 'height' not in json_data:
+            json_data['height'] = config['HEIGHT']['DEFAULT']
+        if 'steps' not in json_data:
+            json_data['steps'] = config['STEPS']['DEFAULT']
+        if 'cfg_scale' not in json_data:
+            json_data['cfg_scale'] = config['SCALE']['DEFAULT']
+        response = await ui.generate_image(
+                positive_prompt, (json_data['width'][0], json_data['height'][0]), negative_prompt, steps=json_data["steps"][0], scale=json_data["cfg_scale"][0], batch_size=1)
+        b64_image = response["images"][0]
+        image_data = base64.b64decode(b64_image)
+        image_filename = str(uuid.uuid4())
+        file = discord.File(io.BytesIO(image_data), filename="image.jpg")
+        await ctx.reply(reply_message, file=file)
+        save_image(image_data, image_filename)
+        log_command(ctx, image_filename)
+        log_prompt(json_data)
+        
 
 if use_novelai:
     # NovelAIを使用する

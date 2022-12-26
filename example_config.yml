@@ -31,3 +31,7 @@ MESSAGE:
     - 以下のメッセージの内容で絵を描きます
   BRACKET:
     - あと、\{\}は()に置き換えました
+  ELEMENTAL_CODE:
+    - 元素法典から選んだ呪文で生成します
+
+ELEMENTAL_CODE_JSON_PATH: elemental_code/json
