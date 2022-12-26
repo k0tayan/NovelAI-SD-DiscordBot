@@ -16,8 +16,18 @@ load_dotenv()
 with open('config.yml', encoding='utf-8') as file:
     config = yaml.safe_load(file)
     lang = config['LANG']
-with open(f'locales/{lang}.yml', encoding='utf-8') as file:
-    locale = yaml.safe_load(file)
+
+# 全ての言語のロケールを読み込む
+locales = {}
+for i in os.listdir('locales'):
+    with open(f'locales/{i}', encoding='utf-8') as file:
+        locales[i.strip('.yml')] = yaml.safe_load(file)
+
+print(locales)
+
+locale = locales[lang]
+
+user_locale = {} # user_id: locale
 
 bot = commands.Bot(command_prefix='', intents=discord.Intents.all())
 
@@ -46,9 +56,9 @@ def parse_option(prompt: list, option: str, value_range: list[int, int, int], f:
     if option in prompt:
         index = prompt.index(option)
         if index >= len(prompt)-1 or not prompt[index+1].isdecimal():
-            raise ValueError(locale['ERROR']['INVALID_OPTION'].replace('<option>', option))
+            raise ValueError({'message':'INVALID_OPTION', 'args': {'option': option}})
         if int(prompt[index+1]) < 1 or int(prompt[index+1]) > _max:
-            raise ValueError(locale['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', option).replace('<max>', str(_max)).replace('<min>', _min))
+            raise ValueError({'message':'INVALID_OPTION_RANGE', 'args': {'option': option, 'max': _max, 'min': _min}})
         value = int(prompt[index+1])
         if f is not None:
             result = f(value)
@@ -65,13 +75,13 @@ def parse_prompt(prompt: tuple) -> dict:
     prompt = list(prompt)
     scale = parse_option(prompt, '-c', config['SCALE'])
     steps = parse_option(prompt, '-s', config['STEPS'])
-    width = parse_option(prompt, '-w', config['WIDTH'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['WIDTH_NOT_MULTIPLE_OF_64']))
-    height = parse_option(prompt, '-h', config['HEIGHT'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['HEIGHT_NOT_MULTIPLE_OF_64']))
+    width = parse_option(prompt, '-w', config['WIDTH'], lambda x : x % 64 == 0, ValueError({'message':'WIDTH_NOT_MULTIPLE_OF_64'}))
+    height = parse_option(prompt, '-h', config['HEIGHT'], lambda x : x % 64 == 0, ValueError({'message':'HEIGHT_NOT_MULTIPLE_OF_64'}))
     batch_size = parse_option(prompt, '-b', config['BATCH_SIZE'])
     # negative_promptの処理
     n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:
-        raise ValueError(locale['ERROR']['INVALID_NEGATIVE_PROMPT'])
+        raise ValueError({'message':'INVALID_NEGATIVE_PROMPT'})
     negative_prompt = ' '.join("" if n == -1 else prompt[n+1:])
     positive_prompt = ' '.join(prompt if n == -1 else prompt[:n])
     response = {
@@ -105,11 +115,11 @@ def is_allowed_guild():
     @bypass_admin
     async def predicate(ctx):
         if ctx.guild is None:
-            await ctx.reply(locale['ERROR']['SERVER_ONLY'])
+            await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['SERVER_ONLY'])
             return False
         if ctx.guild.id in allowed_guild_ids:
             return True
-        await ctx.reply(locale['ERROR']['UNAUTHORIZED_SERVER'])
+        await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['UNAUTHORIZED_SERVER'])
         return False
     return commands.check(predicate)
 
@@ -118,9 +128,15 @@ def is_nsfw():
     async def predicate(ctx):
         if ctx.guild is not None and ctx.channel.is_nsfw():
             return True
-        await ctx.reply(locale['ERROR']['NSFW_ONLY'])
+        await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['NSFW_ONLY'])
         return False
     return commands.check(predicate)
+
+def get_user_locale(user_id: int) -> str:
+    if user_id in user_locale:
+        return user_locale[user_id]
+    else:
+        return lang
 
 @bot.event
 async def on_ready():
@@ -149,6 +165,15 @@ async def on_raw_reaction_add(payload):
                 logger.info(f'{payload.member.name}({message.author.id}) delete {message.content}')
                 await message.delete()
 
+@bot.command(name='locale')
+async def set_locale(ctx, locale_name: str):
+    """locale [locale_name]"""
+    if locale_name in locales:
+        user_locale[ctx.author.id] = locale_name
+        await ctx.reply('Locale set to ' + locale_name)
+    else:
+        await ctx.reply('Locale not found')
+
 if use_webui:
     # WebUIを使用する場合
     ui = webui.WebUI(config['WEBUI_URI'], 'v1')
@@ -161,15 +186,28 @@ if use_webui:
         try:
             args = parse_prompt(prompt)
         except ValueError as e:
-            await ctx.reply(e)
+            error = e.args[0]
+            error_message = error['message']
+            if error_message == 'INVALID_OPTION':
+                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_OPTION'].replace('<option>', error['args']['option']))
+            elif error_message == 'INVALID_OPTION_RANGE':
+                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', error['args']['option']).replace('<min>', str(error['args']['min'])).replace('<max>', str(error['args']['max'])))
+            elif error_message == 'WIDTH_NOT_MULTIPLE_OF_64':
+                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['WIDTH_NOT_MULTIPLE_OF_64'])
+            elif error_message == 'HEIGHT_NOT_MULTIPLE_OF_64':
+                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['HEIGHT_NOT_MULTIPLE_OF_64'])
+            elif error_message == 'INVALID_NEGATIVE_PROMPT':
+                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_NEGATIVE_PROMPT'])
+            else:
+                await ctx.reply(error_message)
             return
-        reply_message = random.choice(locale["MESSAGE"]["RESPONSE"])
+        reply_message = random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["RESPONSE"])
         if args["steps"] != config['STEPS'][2]:
-            reply_message += '\n' + random.choice(locale["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
+            reply_message += '\n' + random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
         positive_prompt = args["positive_prompt"].replace('{', '(').replace('}', ')')
         negative_prompt = args["negative_prompt"].replace('{', '(').replace('}', ')')
         if '{' in args['positive_prompt']+args['negative_prompt'] or '}' in args['positive_prompt']+args['negative_prompt']:
-            reply_message += '\n' + random.choice(locale["MESSAGE"]["BRACKET"])
+            reply_message += '\n' + random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["BRACKET"])
         if args['batch_size'] == 1:
             await ctx.reply(reply_message)
             response = await ui.generate_image(
@@ -210,7 +248,7 @@ if use_webui:
             json_data = json.load(f)
         positive_prompt = json_data['prompt'].replace('{', '(').replace('}', ')')
         negative_prompt = json_data["negative_prompt"].replace('{', '(').replace('}', ')')
-        reply_message = random.choice(locale["MESSAGE"]["ELEMENTAL_CODE"])
+        reply_message = random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["ELEMENTAL_CODE"])
         reply_message += '\n sd ' + positive_prompt + '\n -u ' + negative_prompt
         await ctx.reply(reply_message)
         if 'width' not in json_data:
@@ -248,7 +286,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(locale["MESSAGE"]["RESPONSE"]))
+        await ctx.reply(random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], True)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
@@ -269,7 +307,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(locale["MESSAGE"]["RESPONSE"]))
+        await ctx.reply(random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], False)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
