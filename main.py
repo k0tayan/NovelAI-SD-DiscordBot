@@ -60,11 +60,10 @@ def parse_option(prompt: list, option: str, value_range: list[int, int, int], f:
         value = int(prompt[index+1])
         if f is not None:
             result = f(value)
-            if result:
-                prompt.pop(index) # optionの分を削除(-option)
-                prompt.pop(index) # optionの分を削除(数値)
-            else:
+            if result is False:
                 raise error
+        prompt.pop(index) # optionの分を削除(-option)
+        prompt.pop(index) # optionの分を削除(数値)
     else:
         value = default
     return value
