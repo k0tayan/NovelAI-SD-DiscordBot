@@ -24,6 +24,8 @@ Discord Bot to generate images using StableDiffusion and NovelAI
   - Generate images form elemental code prompt
 - `locale`
   - Set locale
+- `locales'
+  - Show available locales
 - `help`
   - Show help
 

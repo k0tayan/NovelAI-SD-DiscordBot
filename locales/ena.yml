@@ -18,6 +18,7 @@ MESSAGE:
   ELEMENTAL_CODE:
     - 元素法典から選んだ呪文で生成してあげるんだから！
   SET_LOCALE: 初めまして♪ 「25時、ナイトコードで。」の東雲絵名… じゃなくて、えななんです
+  GET_LOCALES: 次のロケールが選択できるわ
   TRANSLATE: プロンプトをGoogle翻訳してあげたわよ!感謝しなさいよね!
   HELP:
     start: このbotは以下のコマンドが使えます

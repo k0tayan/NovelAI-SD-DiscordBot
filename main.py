@@ -196,6 +196,14 @@ async def set_locale(ctx, locale_name: str):
     else:
         await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_LOCALE'])
 
+@bot.command(name='locales')
+async def get_locales(ctx):
+    """locales"""
+    locale_message = locales[get_user_locale(ctx.author.id)]['MESSAGE']['GET_LOCALES'] + '\n'
+    for locale_name in locales.keys():
+        locale_message += f'- {locale_name}\n'
+    await ctx.reply(locale_message)
+
 if use_webui:
     # WebUIを使用する場合
     ui = webui.WebUI(config['WEBUI_URI'], 'v1')

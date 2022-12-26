@@ -12,6 +12,7 @@ MESSAGE:
     - Generate images with a spell from the Elemental Code
   SET_LOCALE: Set locale to en
   TRANSLATE: Prompt translated into English
+  GET_LOCALES: The following locales can be selected
   HELP:
     start: このbotは以下のコマンドが使えます
     sd: |-
