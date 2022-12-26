@@ -6,20 +6,9 @@ GENERATED_IMAGE_OUTDIR: generated_files
 ADMIN_IDS: []
 ALLOWED_GUILD_IDS: []
 DEFAULT_NEGATIVE_PROMPT: lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry
-STEPS:
-  DEFAULT: 20
-  MAXIMUM: 30
-SCALE:
-  DEFAULT: 11
-  MAXIMUM: 20
-SIZE:
-  WIDTH:
-    DEFAULT: 512
-    MAXIMUM: 1024
-  HEIGHT:
-    DEFAULT: 768
-    MAXIMUM: 1024
-BATCH_SIZE:
-  DEFAULT: 1
-  MAXIMUM: 4
+STEPS: [1, 30, 20] # min, max, default
+SCALE: [1, 20, 11]
+WIDTH: [64, 1024, 512]
+HEIGHT: [64, 1024, 768]
+BATCH_SIZE: [1, 4, 1]
 ELEMENTAL_CODE_JSON_PATH: elemental_code/json

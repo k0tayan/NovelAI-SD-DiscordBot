@@ -41,13 +41,14 @@ def save_image(binary, filename:str):
     with open(f'{dir}/{filename}.jpg', 'wb') as f:
         f.write(binary)
 
-def parse_option(prompt: list, option: str, default: int, max: int, f: Callable=None, error: ValueError=None) -> int:
+def parse_option(prompt: list, option: str, value_range: list[int, int, int], f: Callable=None, error: ValueError=None) -> int:
+    _min, _max, default = value_range
     if option in prompt:
         index = prompt.index(option)
         if index >= len(prompt)-1 or not prompt[index+1].isdecimal():
             raise ValueError(locale['ERROR']['INVALID_OPTION'].replace('<option>', option))
-        if int(prompt[index+1]) < 1 or int(prompt[index+1]) > max:
-            raise ValueError(locale['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', option).replace('<max>', str(max)).replace('<min>', '1'))
+        if int(prompt[index+1]) < 1 or int(prompt[index+1]) > _max:
+            raise ValueError(locale['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', option).replace('<max>', str(_max)).replace('<min>', _min))
         value = int(prompt[index+1])
         if f is not None:
             result = f(value)
@@ -62,11 +63,11 @@ def parse_option(prompt: list, option: str, default: int, max: int, f: Callable=
 
 def parse_prompt(prompt: tuple) -> dict:
     prompt = list(prompt)
-    scale = parse_option(prompt, '-c', config['SCALE']['DEFAULT'], config['SCALE']['MAXIMUM'])
-    steps = parse_option(prompt, '-s', config['STEPS']['DEFAULT'], config['STEPS']['MAXIMUM'])
-    width = parse_option(prompt, '-w', config['SIZE']['WIDTH']['DEFAULT'], config['SIZE']['WIDTH']['MAXIMUM'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['WIDTH_NOT_MULTIPLE_OF_64']))
-    height = parse_option(prompt, '-h', config['SIZE']['HEIGHT']['DEFAULT'], config['SIZE']['HEIGHT']['MAXIMUM'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['HEIGHT_NOT_MULTIPLE_OF_64']))
-    batch_size = parse_option(prompt, '-b', config['BATCH_SIZE']['DEFAULT'], config['BATCH_SIZE']['MAXIMUM'])
+    scale = parse_option(prompt, '-c', config['SCALE'])
+    steps = parse_option(prompt, '-s', config['STEPS'])
+    width = parse_option(prompt, '-w', config['WIDTH'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['WIDTH_NOT_MULTIPLE_OF_64']))
+    height = parse_option(prompt, '-h', config['HEIGHT'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['HEIGHT_NOT_MULTIPLE_OF_64']))
+    batch_size = parse_option(prompt, '-b', config['BATCH_SIZE'])
     # negative_promptの処理
     n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:
@@ -163,7 +164,7 @@ if use_webui:
             await ctx.reply(e)
             return
         reply_message = random.choice(locale["MESSAGE"]["RESPONSE"])
-        if args["steps"] != config['STEPS']['DEFAULT']:
+        if args["steps"] != config['STEPS'][2]:
             reply_message += '\n' + random.choice(locale["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
         positive_prompt = args["positive_prompt"].replace('{', '(').replace('}', ')')
         negative_prompt = args["negative_prompt"].replace('{', '(').replace('}', ')')
@@ -213,13 +214,13 @@ if use_webui:
         reply_message += '\n sd ' + positive_prompt + '\n -u ' + negative_prompt
         await ctx.reply(reply_message)
         if 'width' not in json_data:
-            json_data['width'] = config['WIDTH']['DEFAULT']
+            json_data['width'] = config['WIDTH'][2]
         if 'height' not in json_data:
-            json_data['height'] = config['HEIGHT']['DEFAULT']
+            json_data['height'] = config['HEIGHT'][2]
         if 'steps' not in json_data:
-            json_data['steps'] = config['STEPS']['DEFAULT']
+            json_data['steps'] = config['STEPS'][2]
         if 'cfg_scale' not in json_data:
-            json_data['cfg_scale'] = config['SCALE']['DEFAULT']
+            json_data['cfg_scale'] = config['SCALE'][2]
         response = await ui.generate_image(
                 positive_prompt, (json_data['width'][0], json_data['height'][0]), negative_prompt, steps=json_data["steps"][0], scale=json_data["cfg_scale"][0], batch_size=1)
         b64_image = response["images"][0]
@@ -305,7 +306,7 @@ async def on_message(message):
                 message_text = random.choice(config['MESSAGE']['LINK']) + '\n' + linked_message.content
                 await message.reply(message_text)
                 response = await ui.generate_image(
-                    linked_message.content, (512, 768), default_negative_prompt, steps=config['STEPS']['DEFAULT'], scale=config['SCALE']['DEFAULT'])
+                    linked_message.content, (512, 768), default_negative_prompt, steps=config['STEPS'][2], scale=config['SCALE'][2])
                 b64_image = response["images"][0]
                 image_data = base64.b64decode(b64_image)
                 image_filename = str(uuid.uuid4())
