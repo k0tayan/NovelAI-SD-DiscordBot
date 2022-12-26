@@ -1,0 +1,3 @@
+[submodule "elemental_code"]
+	path = elemental_code
+	url = https://github.com/aka7774/elemental_code/
