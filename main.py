@@ -239,23 +239,29 @@ async def on_message(message):
         if use_webui:
             # WebUIを使用する場合
             server_id, channel_id, message_id = message.content.split('/')[-3:]
+            if server_id is None or channel_id is None or message_id is None:
+                return
+            if not server_id.isdigit() or not channel_id.isdigit() or not message_id.isdigit():
+                return
             server = bot.get_guild(int(server_id))
+            if server is None:
+                return
             channel = server.get_channel(int(channel_id))
+            if channel is None:
+                return
             linked_message = await channel.fetch_message(int(message_id))
-            linked_message_content = linked_message.content
-            print(linked_message_content)
             # 取得したメッセージに対して返信する
-            if message.author != bot.user and linked_message_content != "" and message.channel.is_nsfw():
+            if message.author != bot.user and linked_message.content != "" and message.channel.is_nsfw():
                 # 自分自身の発言ではない、メッセージが空でない、NSFWチャンネルである場合
-                message_text = random.choice(config['MESSAGE']['LINK']) + '\n' + linked_message_content
+                message_text = random.choice(config['MESSAGE']['LINK']) + '\n' + linked_message.content
                 await message.reply(message_text)
                 response = await ui.generate_image(
-                    linked_message_content, (512, 768), default_negative_prompt, steps=config['STEPS']['DEFAULT'], scale=config['SCALE']['DEFAULT'])
+                    linked_message.content, (512, 768), default_negative_prompt, steps=config['STEPS']['DEFAULT'], scale=config['SCALE']['DEFAULT'])
                 b64_image = response["images"][0]
                 image_data = base64.b64decode(b64_image)
                 image_filename = str(uuid.uuid4())
                 save_image(image_data, image_filename)
-                logger.info(f"Prompt from {message.author}: {linked_message_content}")
+                logger.info(f"Prompt from {message.author}: {linked_message.content}")
                 logger.info(f"Generated image: {image_filename}")
                 file = discord.File(io.BytesIO(image_data), filename="image.jpg")
                 await message.reply(file=file)
