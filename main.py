@@ -167,9 +167,9 @@ async def set_locale(ctx, locale_name: str):
     """locale [locale_name]"""
     if locale_name in locales:
         user_locale[ctx.author.id] = locale_name
-        await ctx.reply('Locale set to ' + locale_name)
+        await ctx.reply(locales[locale_name]['MESSAGE']['SET_LOCALE'])
     else:
-        await ctx.reply('Locale not found')
+        await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_LOCALE'])
 
 if use_webui:
     # WebUIを使用する場合

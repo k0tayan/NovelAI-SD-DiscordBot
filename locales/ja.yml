@@ -10,6 +10,7 @@ MESSAGE:
     - あと、\{\}は()に置き換えました
   ELEMENTAL_CODE:
     - 元素法典から選んだ呪文で生成します
+  SET_LOCALE: 日本語に設定しました
 ERROR:
   INVALID_OPTION: <option>が不正です
   INVALID_OPTION_RANGE: <option>は<min>~<max>の間で指定してください
@@ -19,3 +20,4 @@ ERROR:
   UNAUTHORIZED_SERVER: このコマンドはこのサーバーで使用できません
   SERVER_ONLY: このコマンドはサーバー内でのみ使用できます
   NSFW_ONLY: このコマンドはNSFWチャンネルでのみ使用できます
+  INVALID_LOCALE: 指定したロケールがありません
