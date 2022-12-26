@@ -1,5 +1,6 @@
 USE_WEBUI: True
 USE_NOVELAI: True
+LOCALE: ja
 WEBUI_URI: http://localhost:15000
 GENERATED_IMAGE_OUTDIR: generated_files
 ADMIN_IDS: []
@@ -21,17 +22,4 @@ SIZE:
 BATCH_SIZE:
   DEFAULT: 1
   MAXIMUM: 4
-MESSAGE:
-  RESPONSE:
-    - 画像を生成しています
-    - ちょっと待っててね
-  STEPS:
-    - <0>ステップで作成しています
-  LINK:
-    - 以下のメッセージの内容で絵を描きます
-  BRACKET:
-    - あと、\{\}は()に置き換えました
-  ELEMENTAL_CODE:
-    - 元素法典から選んだ呪文で生成します
-
 ELEMENTAL_CODE_JSON_PATH: elemental_code/json

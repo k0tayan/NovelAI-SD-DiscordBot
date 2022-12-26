@@ -15,6 +15,9 @@ import json
 load_dotenv()
 with open('config.yml', encoding='utf-8') as file:
     config = yaml.safe_load(file)
+    lang = config['LANG']
+with open(f'locales/{lang}.yml', encoding='utf-8') as file:
+    locale = yaml.safe_load(file)
 
 bot = commands.Bot(command_prefix='', intents=discord.Intents.all())
 
@@ -134,7 +137,7 @@ async def on_raw_reaction_add(payload):
     # リアクションしたのが自分だったら無視
     if payload.user_id == bot.user.id:
         return
-    if payload.emoji.name == config['REACTION']['DELETE']:
+    if payload.emoji.name == locale['REACTION']['DELETE']:
         channel = bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         if message.author == bot.user:
@@ -159,13 +162,13 @@ if use_webui:
         except ValueError as e:
             await ctx.reply(e)
             return
-        reply_message = random.choice(config["MESSAGE"]["RESPONSE"])
+        reply_message = random.choice(locale["MESSAGE"]["RESPONSE"])
         if args["steps"] != config['STEPS']['DEFAULT']:
-            reply_message += '\n' + random.choice(config["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
+            reply_message += '\n' + random.choice(locale["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
         positive_prompt = args["positive_prompt"].replace('{', '(').replace('}', ')')
         negative_prompt = args["negative_prompt"].replace('{', '(').replace('}', ')')
         if '{' in args['positive_prompt']+args['negative_prompt'] or '}' in args['positive_prompt']+args['negative_prompt']:
-            reply_message += '\n' + random.choice(config["MESSAGE"]["BRACKET"])
+            reply_message += '\n' + random.choice(locale["MESSAGE"]["BRACKET"])
         if args['batch_size'] == 1:
             await ctx.reply(reply_message)
             response = await ui.generate_image(
@@ -175,7 +178,7 @@ if use_webui:
             image_filename = str(uuid.uuid4())
             file = discord.File(io.BytesIO(image_data), filename="image.jpg")
             message = await ctx.reply(file=file)
-            await message.add_reaction(config["REACTION"]["DELETE"])
+            await message.add_reaction(locale["REACTION"]["DELETE"])
         else:
             if type(ctx.message.channel) is discord.channel.TextChannel:
                 thread = await ctx.message.create_thread(name=" ".join(prompt)[:100])
@@ -191,10 +194,10 @@ if use_webui:
                 file = discord.File(io.BytesIO(image_data), filename="image.jpg")
                 if type(ctx.message.channel) is discord.channel.TextChannel:
                     message = await thread.send(file=file)
-                    await message.add_reaction(config["REACTION"]["DELETE"])
+                    await message.add_reaction(locale["REACTION"]["DELETE"])
                 else:
                     message = await ctx.reply(file=file)
-                    await message.add_reaction(config["REACTION"]["DELETE"])
+                    await message.add_reaction(locale["REACTION"]["DELETE"])
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(args)
@@ -206,7 +209,7 @@ if use_webui:
             json_data = json.load(f)
         positive_prompt = json_data['prompt'].replace('{', '(').replace('}', ')')
         negative_prompt = json_data["negative_prompt"].replace('{', '(').replace('}', ')')
-        reply_message = random.choice(config["MESSAGE"]["ELEMENTAL_CODE"])
+        reply_message = random.choice(locale["MESSAGE"]["ELEMENTAL_CODE"])
         reply_message += '\n sd ' + positive_prompt + '\n -u ' + negative_prompt
         await ctx.reply(reply_message)
         if 'width' not in json_data:
@@ -224,7 +227,7 @@ if use_webui:
         image_filename = str(uuid.uuid4())
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         message = await ctx.reply(file=file)
-        await message.add_reaction(config["REACTION"]["DELETE"])
+        await message.add_reaction(locale["REACTION"]["DELETE"])
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(json_data)
@@ -244,7 +247,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(config["MESSAGE"]["RESPONSE"]))
+        await ctx.reply(random.choice(locale["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], True)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
@@ -252,7 +255,7 @@ if use_novelai:
         log_prompt(args)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         message = await ctx.reply(file=file)
-        await message.add_reaction(config["REACTION"]["DELETE"])
+        await message.add_reaction(locale["REACTION"]["DELETE"])
     
     @is_allowed_guild()
     @is_nsfw()
@@ -265,7 +268,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(config["MESSAGE"]["RESPONSE"]))
+        await ctx.reply(random.choice(locale["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], False)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
@@ -273,7 +276,7 @@ if use_novelai:
         log_prompt(args)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         message = await ctx.reply(file=file)
-        await message.add_reaction(config["REACTION"]["DELETE"])
+        await message.add_reaction(locale["REACTION"]["DELETE"])
 
 @bot.event
 async def on_message(message):
@@ -311,7 +314,7 @@ async def on_message(message):
                 logger.info(f"Generated image: {image_filename}")
                 file = discord.File(io.BytesIO(image_data), filename="image.jpg")
                 sent_message = await message.reply(file=file)
-                await sent_message.add_reaction(config["REACTION"]["DELETE"])
+                await sent_message.add_reaction(locale["REACTION"]["DELETE"])
     else:
         await bot.process_commands(message)
 

@@ -1,0 +1,14 @@
+MESSAGE:
+  RESPONSE:
+    - 画像を生成しています
+    - ちょっと待っててね
+  STEPS:
+    - <0>ステップで作成しています
+  LINK:
+    - 以下のメッセージの内容で絵を描きます
+  BRACKET:
+    - あと、\{\}は()に置き換えました
+  ELEMENTAL_CODE:
+    - 元素法典から選んだ呪文で生成します
+REACTION:
+  DELETE: 🗑️
