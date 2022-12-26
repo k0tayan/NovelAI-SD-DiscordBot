@@ -217,7 +217,7 @@ if use_webui:
         image_data = base64.b64decode(b64_image)
         image_filename = str(uuid.uuid4())
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
-        await ctx.reply(reply_message, file=file)
+        await ctx.reply(file=file)
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(json_data)
