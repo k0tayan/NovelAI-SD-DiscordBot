@@ -156,10 +156,14 @@ if use_webui:
         reply_message = random.choice(config["MESSAGE"]["RESPONSE"])
         if args["steps"] != config['STEPS']['DEFAULT']:
             reply_message += '\n' + random.choice(config["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
+        positive_prompt = args["positive_prompt"].replace('{', '(').replace('}', ')')
+        negative_prompt = args["negative_prompt"].replace('{', '(').replace('}', ')')
+        if '{' in args['positive_prompt']+args['negative_prompt'] or '}' in args['positive_prompt']+args['negative_prompt']:
+            reply_message += '\n' + random.choice(config["MESSAGE"]["BRACKET"])
         if args['batch_size'] == 1:
             await ctx.reply(reply_message)
             response = await ui.generate_image(
-                args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"])
+                positive_prompt, (args['width'], args['height']), default_negative_prompt+negative_prompt, steps=args["steps"], scale=args["scale"])
             b64_image = response["images"][0]
             image_data = base64.b64decode(b64_image)
             image_filename = str(uuid.uuid4())
@@ -172,7 +176,7 @@ if use_webui:
             else:
                 await ctx.reply(reply_message)
             response = await ui.generate_image(
-                args["positive_prompt"], (args['width'], args['height']), default_negative_prompt+args["negative_prompt"], steps=args["steps"], scale=args["scale"], batch_size=args['batch_size'])
+                positive_prompt, (args['width'], args['height']), default_negative_prompt+negative_prompt, steps=args["steps"], scale=args["scale"], batch_size=args['batch_size'])
             for b64_image in response["images"]:
                 image_data = base64.b64decode(b64_image)
                 image_filename = str(uuid.uuid4())
