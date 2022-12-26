@@ -12,6 +12,38 @@ MESSAGE:
     - 元素法典から選んだ呪文で生成します
   SET_LOCALE: 日本語に設定しました
   TRANSLATE: プロンプトを英語に翻訳しました
+  HELP:
+    start: このbotは以下のコマンドが使えます
+    sd: |-
+      `sd プロンプト`
+      stable-diffusion-webuiを用いて、プロンプトの内容で画像を生成します
+      以下のオプションがあります
+      -u [ネガティブプロンプト]
+      -s [ステップ数]
+      -c [CFG Scale]
+      -w [画像の幅]
+      -h [画像の高さ]
+      -b [バッチサイズ]
+      -t(翻訳するかどうか、しない場合はつけなくて良い)
+    sfw: |-
+      `sfw プロンプト`
+      NovelAIのCurated Modelを用いて、プロンプトの内容で画像を生成します
+      以下のオプションがあります
+      -u [ネガティブプロンプト]
+    nsfw: |-
+      `nsfw prompt`
+      NovelAIのFull Modelを用いて、プロンプトの内容で画像を生成します
+      以下のオプションがあります
+       -u [ネガティブプロンプト]
+    ele: |-
+      `ele`
+      元素法典からランダムに選択した呪文で画像を生成します
+    locale: |-
+      `locale [locale]`
+      言語を指定したロケールに設定します
+    help: |-
+      `help`
+      このメッセージを表示します
 ERROR:
   INVALID_OPTION: <option>が不正です
   INVALID_OPTION_RANGE: <option>は<min>~<max>の間で指定してください
