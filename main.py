@@ -23,8 +23,6 @@ for i in os.listdir('locales'):
     with open(f'locales/{i}', encoding='utf-8') as file:
         locales[i.strip('.yml')] = yaml.safe_load(file)
 
-print(locales)
-
 locale = locales[lang]
 
 user_locale = {} # user_id: locale
