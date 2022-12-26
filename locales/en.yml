@@ -19,5 +19,3 @@ ERROR:
   UNAUTHORIZED_SERVER: This command cannot be used on this server
   SERVER_ONLY: This command can only be used within a server
   NSFW_ONLY: This command can only be used on NSFW channels
-REACTION:
-  DELETE: 🗑️

@@ -154,7 +154,7 @@ async def on_raw_reaction_add(payload):
     # リアクションしたのが自分だったら無視
     if payload.user_id == bot.user.id:
         return
-    if payload.emoji.name == locale['REACTION']['DELETE']:
+    if payload.emoji.name == config['REACTION']['DELETE']:
         channel = bot.get_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         if message.author == bot.user:
@@ -217,7 +217,7 @@ if use_webui:
             image_filename = str(uuid.uuid4())
             file = discord.File(io.BytesIO(image_data), filename="image.jpg")
             message = await ctx.reply(file=file)
-            await message.add_reaction(locale["REACTION"]["DELETE"])
+            await message.add_reaction(config['REACTION']["DELETE"])
         else:
             if type(ctx.message.channel) is discord.channel.TextChannel:
                 thread = await ctx.message.create_thread(name=" ".join(prompt)[:100])
@@ -233,10 +233,10 @@ if use_webui:
                 file = discord.File(io.BytesIO(image_data), filename="image.jpg")
                 if type(ctx.message.channel) is discord.channel.TextChannel:
                     message = await thread.send(file=file)
-                    await message.add_reaction(locale["REACTION"]["DELETE"])
+                    await message.add_reaction(config['REACTION']["DELETE"])
                 else:
                     message = await ctx.reply(file=file)
-                    await message.add_reaction(locale["REACTION"]["DELETE"])
+                    await message.add_reaction(config['REACTION']["DELETE"])
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(args)
@@ -266,7 +266,7 @@ if use_webui:
         image_filename = str(uuid.uuid4())
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         message = await ctx.reply(file=file)
-        await message.add_reaction(locale["REACTION"]["DELETE"])
+        await message.add_reaction(config['REACTION']["DELETE"])
         save_image(image_data, image_filename)
         log_command(ctx, image_filename)
         log_prompt(json_data)
@@ -294,7 +294,7 @@ if use_novelai:
         log_prompt(args)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         message = await ctx.reply(file=file)
-        await message.add_reaction(locale["REACTION"]["DELETE"])
+        await message.add_reaction(config['REACTION']["DELETE"])
     
     @is_allowed_guild()
     @is_nsfw()
@@ -315,7 +315,7 @@ if use_novelai:
         log_prompt(args)
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         message = await ctx.reply(file=file)
-        await message.add_reaction(locale["REACTION"]["DELETE"])
+        await message.add_reaction(config['REACTION']["DELETE"])
 
 @bot.event
 async def on_message(message):
@@ -353,7 +353,7 @@ async def on_message(message):
                 logger.info(f"Generated image: {image_filename}")
                 file = discord.File(io.BytesIO(image_data), filename="image.jpg")
                 sent_message = await message.reply(file=file)
-                await sent_message.add_reaction(locale["REACTION"]["DELETE"])
+                await sent_message.add_reaction(config['REACTION']["DELETE"])
     else:
         await bot.process_commands(message)
 

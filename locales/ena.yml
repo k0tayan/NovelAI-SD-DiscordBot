@@ -26,5 +26,3 @@ ERROR:
   UNAUTHORIZED_SERVER: このコマンドはこのサーバーで使用できません
   SERVER_ONLY: このコマンドはサーバー内でのみ使用できます
   NSFW_ONLY: このコマンドはNSFWチャンネルでのみ使用できます
-REACTION:
-  DELETE: 🗑️
