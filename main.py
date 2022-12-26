@@ -45,9 +45,9 @@ def parse_option(prompt: list, option: str, default: int, max: int, f: Callable=
     if option in prompt:
         index = prompt.index(option)
         if index >= len(prompt)-1 or not prompt[index+1].isdecimal():
-            raise ValueError(f"{option}が不正です。")
+            raise ValueError(locale['ERROR']['INVALID_OPTION'].replace('<option>', option))
         if int(prompt[index+1]) < 1 or int(prompt[index+1]) > max:
-            raise ValueError(f"{option}は1~{max}の間で指定してください。")
+            raise ValueError(locale['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', option).replace('<max>', str(max)).replace('<min>', '1'))
         value = int(prompt[index+1])
         if f is not None:
             result = f(value)
@@ -64,13 +64,13 @@ def parse_prompt(prompt: tuple) -> dict:
     prompt = list(prompt)
     scale = parse_option(prompt, '-c', config['SCALE']['DEFAULT'], config['SCALE']['MAXIMUM'])
     steps = parse_option(prompt, '-s', config['STEPS']['DEFAULT'], config['STEPS']['MAXIMUM'])
-    width = parse_option(prompt, '-w', config['SIZE']['WIDTH']['DEFAULT'], config['SIZE']['WIDTH']['MAXIMUM'], lambda x : x % 64 == 0, ValueError("widthは64の倍数で指定してください。"))
-    height = parse_option(prompt, '-h', config['SIZE']['HEIGHT']['DEFAULT'], config['SIZE']['HEIGHT']['MAXIMUM'], lambda x : x % 64 == 0, ValueError("heightは64の倍数で指定してください。"))
+    width = parse_option(prompt, '-w', config['SIZE']['WIDTH']['DEFAULT'], config['SIZE']['WIDTH']['MAXIMUM'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['WIDTH_NOT_MULTIPLE_OF_64']))
+    height = parse_option(prompt, '-h', config['SIZE']['HEIGHT']['DEFAULT'], config['SIZE']['HEIGHT']['MAXIMUM'], lambda x : x % 64 == 0, ValueError(locale['ERROR']['HEIGHT_NOT_MULTIPLE_OF_64']))
     batch_size = parse_option(prompt, '-b', config['BATCH_SIZE']['DEFAULT'], config['BATCH_SIZE']['MAXIMUM'])
     # negative_promptの処理
     n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:
-        raise ValueError("パラメーターが不正です。")
+        raise ValueError(locale['ERROR']['INVALID_NEGATIVE_PROMPT'])
     negative_prompt = ' '.join("" if n == -1 else prompt[n+1:])
     positive_prompt = ' '.join(prompt if n == -1 else prompt[:n])
     response = {
@@ -104,11 +104,11 @@ def is_allowed_guild():
     @bypass_admin
     async def predicate(ctx):
         if ctx.guild is None:
-            await ctx.reply("このコマンドはサーバー内でのみ使用できます。")
+            await ctx.reply(locale['ERROR']['SERVER_ONLY'])
             return False
         if ctx.guild.id in allowed_guild_ids:
             return True
-        await ctx.reply("このコマンドはこのサーバーで使用できません。")
+        await ctx.reply(locale['ERROR']['UNAUTHORIZED_SERVER'])
         return False
     return commands.check(predicate)
 
@@ -117,7 +117,7 @@ def is_nsfw():
     async def predicate(ctx):
         if ctx.guild is not None and ctx.channel.is_nsfw():
             return True
-        await ctx.reply("このコマンドはNSFWチャンネルでのみ使用できます。")
+        await ctx.reply(locale['ERROR']['NSFW_ONLY'])
         return False
     return commands.check(predicate)
 

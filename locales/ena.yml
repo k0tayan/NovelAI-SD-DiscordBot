@@ -17,5 +17,14 @@ MESSAGE:
     - あと、\{\}は()に置き換えてあげたわ！
   ELEMENTAL_CODE:
     - 元素法典から選んだ呪文で生成してあげるんだから！
+ERROR:
+  INVALID_OPTION: <option>が不正です
+  INVALID_OPTION_RANGE: <option>は<min>~<max>の間で指定してください
+  WIDTH_NOT_MULTIPLE_OF_64: widthは64の倍数で指定してください
+  HEIGHT_NOT_MULTIPLE_OF_64: heightは64の倍数で指定してください
+  INVALID_NEGATIVE_PROMPT: negative_promptが不正です
+  UNAUTHORIZED_SERVER: このコマンドはこのサーバーで使用できません
+  SERVER_ONLY: このコマンドはサーバー内でのみ使用できます
+  NSFW_ONLY: このコマンドはNSFWチャンネルでのみ使用できます
 REACTION:
   DELETE: 🗑️
