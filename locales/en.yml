@@ -1,0 +1,23 @@
+MESSAGE:
+  RESPONSE:
+    - Generating images...
+    - Please wait a moment.
+  STEPS:
+    - Generating in <0> steps
+  LINK:
+    - Generating an image with the contents of the following message
+  BRACKET:
+    - And \{\} is replaced by ()
+  ELEMENTAL_CODE:
+    - Generate images with a spell from the Elemental Code
+ERROR:
+  INVALID_OPTION: <option> is invalid
+  INVALID_OPTION_RANGE: <option> must be between <min>~<max>
+  WIDTH_NOT_MULTIPLE_OF_64: width must be a multiple of 64
+  HEIGHT_NOT_MULTIPLE_OF_64: height must be a multiple of 64
+  INVALID_NEGATIVE_PROMPT: negative_prompt is invalid
+  UNAUTHORIZED_SERVER: This command cannot be used on this server
+  SERVER_ONLY: This command can only be used within a server
+  NSFW_ONLY: This command can only be used on NSFW channels
+REACTION:
+  DELETE: 🗑️
