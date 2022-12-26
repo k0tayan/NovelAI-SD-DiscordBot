@@ -32,3 +32,4 @@ MANIFEST
 config.yml
 generated_files/*
 poetry.toml
+key.json

@@ -11,6 +11,7 @@ MESSAGE:
   ELEMENTAL_CODE:
     - Generate images with a spell from the Elemental Code
   SET_LOCALE: Set locale to en
+  TRANSLATE: Prompt translated into English
 ERROR:
   INVALID_OPTION: <option> is invalid
   INVALID_OPTION_RANGE: <option> must be between <min>~<max>

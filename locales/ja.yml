@@ -11,6 +11,7 @@ MESSAGE:
   ELEMENTAL_CODE:
     - 元素法典から選んだ呪文で生成します
   SET_LOCALE: 日本語に設定しました
+  TRANSLATE: プロンプトを英語に翻訳しました
 ERROR:
   INVALID_OPTION: <option>が不正です
   INVALID_OPTION_RANGE: <option>は<min>~<max>の間で指定してください

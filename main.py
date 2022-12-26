@@ -13,6 +13,8 @@ from collections.abc import Callable
 import json
 
 load_dotenv()
+from google.cloud import translate
+
 with open('config.yml', encoding='utf-8') as file:
     config = yaml.safe_load(file)
     lang = config['LANG']
@@ -88,7 +90,8 @@ def parse_prompt(prompt: tuple) -> dict:
         'scale': scale,
         'width': width,
         'height': height,
-        'batch_size': batch_size
+        'batch_size': batch_size,
+        'translate': '-t' in prompt
     }
     return response
 
@@ -100,6 +103,28 @@ def log_command(ctx, image_filename):
 
 def log_prompt(prompt: dict):
     print(prompt)
+
+def translate_prompt(positive_prompt: str, negative_prompt: str) -> dict:
+    if config['USE_GOOGLE_TRANS'] is False:
+        return positive_prompt, negative_prompt
+    location = "global"
+    project_id = config['GOOGLE_TRANS_PROJECT_ID']
+    parent = f"projects/{project_id}/locations/{location}"
+    client = translate.TranslationServiceClient()
+    text = [positive_prompt]
+    if negative_prompt != '':
+        text.append(negative_prompt)
+    response = client.translate_text(
+        request={
+            "parent":parent,
+            "contents":text,
+            "mime_type":'text/plain',  # mime types: text/plain, text/html
+            "target_language_code":'en'
+        }
+    )
+    positive_prompt = response.translations[0].translated_text
+    negative_prompt = response.translations[1].translated_text if len(response.translations) > 1 else ''
+    return positive_prompt, negative_prompt
 
 def bypass_admin(func):
     def predicate(ctx):
@@ -178,7 +203,7 @@ if use_webui:
     @is_nsfw()
     @bot.command(name='sd')
     async def generate_with_sd(ctx, *prompt):
-        """sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size]"""
+        """sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size] -t(translate prompt)"""
 
         try:
             args = parse_prompt(prompt)
@@ -203,6 +228,9 @@ if use_webui:
             reply_message += '\n' + random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
         positive_prompt = args["positive_prompt"].replace('{', '(').replace('}', ')')
         negative_prompt = args["negative_prompt"].replace('{', '(').replace('}', ')')
+        if args['translate']:
+            positive_prompt, negative_prompt = translate_prompt(positive_prompt, negative_prompt)
+            reply_message += '\n' + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["TRANSLATE"]
         if '{' in args['positive_prompt']+args['negative_prompt'] or '}' in args['positive_prompt']+args['negative_prompt']:
             reply_message += '\n' + random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["BRACKET"])
         if args['batch_size'] == 1:

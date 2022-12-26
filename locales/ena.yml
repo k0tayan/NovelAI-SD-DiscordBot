@@ -18,6 +18,7 @@ MESSAGE:
   ELEMENTAL_CODE:
     - 元素法典から選んだ呪文で生成してあげるんだから！
   SET_LOCALE: 初めまして♪ 「25時、ナイトコードで。」の東雲絵名… じゃなくて、えななんです
+  TRANSLATE: プロンプトをGoogle翻訳してあげたわよ!感謝しなさいよね!
 ERROR:
   INVALID_OPTION: <option>が不正です
   INVALID_OPTION_RANGE: <option>は<min>~<max>の間で指定してください

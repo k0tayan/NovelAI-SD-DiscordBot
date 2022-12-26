@@ -3,6 +3,8 @@ USE_NOVELAI: True
 LOCALE: ja
 WEBUI_URI: http://localhost:15000
 GENERATED_IMAGE_OUTDIR: generated_files
+USE_GOOGLE_TRANS: False
+GOOGLE_TRANS_PROJECT_ID: none
 ADMIN_IDS: []
 ALLOWED_GUILD_IDS: []
 DEFAULT_NEGATIVE_PROMPT: lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry

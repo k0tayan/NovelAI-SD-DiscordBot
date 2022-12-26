@@ -12,6 +12,7 @@ python = ">=3.9,<3.11"
 python-dotenv = "^0.21.0"
 aiohttp = "^3.8.3"
 pyyaml = "^6.0"
+google-cloud-translate = "^3.9.0"
 
 [tool.poetry.group.dev.dependencies]
 novelai-api = "^0.10.2"
