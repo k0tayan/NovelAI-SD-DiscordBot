@@ -11,6 +11,7 @@ MESSAGE:
   ELEMENTAL_CODE:
     - 元素法典から選んだ呪文で生成します
   SET_LOCALE: 日本語に設定しました
+  GET_LOCALE: 現在のロケールはjaです
   GET_LOCALES: 次のロケールが選択できます
   TRANSLATE: プロンプトを英語に翻訳しました
   HELP:

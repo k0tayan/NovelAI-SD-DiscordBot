@@ -11,6 +11,12 @@ import random
 from logging import getLogger, StreamHandler, DEBUG
 from collections.abc import Callable
 import json
+import asyncio
+from utils import locale
+
+COGS = [
+    'cogs.locale'
+]
 
 load_dotenv()
 from google.cloud import translate
@@ -188,23 +194,6 @@ async def on_raw_reaction_add(payload):
             else:
                 logger.info(f'{payload.member.name}({message.author.id}) delete {message.content}')
                 await message.delete()
-
-@bot.command(name='locale')
-async def set_locale(ctx, locale_name: str):
-    """locale [locale_name]"""
-    if locale_name in locales:
-        user_locale[ctx.author.id] = locale_name
-        await ctx.reply(locales[locale_name]['MESSAGE']['SET_LOCALE'])
-    else:
-        await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['INVALID_LOCALE'])
-
-@bot.command(name='locales')
-async def get_locales(ctx):
-    """locales"""
-    locale_message = get_user_locale(ctx.author.id)['MESSAGE']['GET_LOCALES'] + '\n'
-    for locale_name in locales.keys():
-        locale_message += f'- {locale_name}\n'
-    await ctx.reply(locale_message)
 
 if use_webui:
     # WebUIを使用する場合
@@ -406,4 +395,9 @@ async def on_message(message):
         await bot.process_commands(message)
 
 if __name__ == '__main__':
-    bot.run(os.getenv('DISCORD_TOKEN'))
+    async def main():
+        async with bot:
+            for cog in COGS:
+                await bot.load_extension(cog)
+            await bot.start(os.getenv('DISCORD_TOKEN'))
+    asyncio.run(main())    
