@@ -17,15 +17,14 @@ from google.cloud import translate
 
 with open('config.yml', encoding='utf-8') as file:
     config = yaml.safe_load(file)
-    lang = config['LANG']
 
-# 全ての言語のロケールを読み込む
+# 全てのロケールを読み込む
 locales = {}
 for i in os.listdir('locales'):
     with open(f'locales/{i}', encoding='utf-8') as file:
         locales[i.strip('.yml')] = yaml.safe_load(file)
 
-locale = locales[lang]
+default_locale = locales[config['LOCALE']]
 
 user_locale = {} # user_id: locale
 
@@ -137,11 +136,11 @@ def is_allowed_guild():
     @bypass_admin
     async def predicate(ctx):
         if ctx.guild is None:
-            await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['SERVER_ONLY'])
+            await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['SERVER_ONLY'])
             return False
         if ctx.guild.id in allowed_guild_ids:
             return True
-        await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['UNAUTHORIZED_SERVER'])
+        await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['UNAUTHORIZED_SERVER'])
         return False
     return commands.check(predicate)
 
@@ -150,15 +149,18 @@ def is_nsfw():
     async def predicate(ctx):
         if ctx.guild is not None and ctx.channel.is_nsfw():
             return True
-        await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['NSFW_ONLY'])
+        await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['NSFW_ONLY'])
         return False
     return commands.check(predicate)
 
-def get_user_locale(user_id: int) -> str:
+def get_user_locale(user_id: int) -> dict:
     if user_id in user_locale:
-        return user_locale[user_id]
+        if user_locale[user_id] in locales:
+            return locales[user_locale[user_id]]
+        else:
+            return default_locale
     else:
-        return lang
+        return default_locale
 
 @bot.event
 async def on_ready():
@@ -194,12 +196,12 @@ async def set_locale(ctx, locale_name: str):
         user_locale[ctx.author.id] = locale_name
         await ctx.reply(locales[locale_name]['MESSAGE']['SET_LOCALE'])
     else:
-        await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_LOCALE'])
+        await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['INVALID_LOCALE'])
 
 @bot.command(name='locales')
 async def get_locales(ctx):
     """locales"""
-    locale_message = locales[get_user_locale(ctx.author.id)]['MESSAGE']['GET_LOCALES'] + '\n'
+    locale_message = get_user_locale(ctx.author.id)['MESSAGE']['GET_LOCALES'] + '\n'
     for locale_name in locales.keys():
         locale_message += f'- {locale_name}\n'
     await ctx.reply(locale_message)
@@ -219,28 +221,28 @@ if use_webui:
             error = e.args[0]
             error_message = error['message']
             if error_message == 'INVALID_OPTION':
-                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_OPTION'].replace('<option>', error['args']['option']))
+                await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['INVALID_OPTION'].replace('<option>', error['args']['option']))
             elif error_message == 'INVALID_OPTION_RANGE':
-                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', error['args']['option']).replace('<min>', str(error['args']['min'])).replace('<max>', str(error['args']['max'])))
+                await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', error['args']['option']).replace('<min>', str(error['args']['min'])).replace('<max>', str(error['args']['max'])))
             elif error_message == 'WIDTH_NOT_MULTIPLE_OF_64':
-                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['WIDTH_NOT_MULTIPLE_OF_64'])
+                await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['WIDTH_NOT_MULTIPLE_OF_64'])
             elif error_message == 'HEIGHT_NOT_MULTIPLE_OF_64':
-                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['HEIGHT_NOT_MULTIPLE_OF_64'])
+                await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['HEIGHT_NOT_MULTIPLE_OF_64'])
             elif error_message == 'INVALID_NEGATIVE_PROMPT':
-                await ctx.reply(locales[get_user_locale(ctx.author.id)]['ERROR']['INVALID_NEGATIVE_PROMPT'])
+                await ctx.reply(get_user_locale(ctx.author.id)['ERROR']['INVALID_NEGATIVE_PROMPT'])
             else:
                 await ctx.reply(error_message)
             return
-        reply_message = random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["RESPONSE"])
+        reply_message = random.choice(get_user_locale(ctx.author.id)["MESSAGE"]["RESPONSE"])
         if args["steps"] != config['STEPS'][2]:
-            reply_message += '\n' + random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
+            reply_message += '\n' + random.choice(get_user_locale(ctx.author.id)["MESSAGE"]["STEPS"]).replace("<0>", str(args["steps"]))
         positive_prompt = args["positive_prompt"].replace('{', '(').replace('}', ')')
         negative_prompt = args["negative_prompt"].replace('{', '(').replace('}', ')')
         if args['translate']:
             positive_prompt, negative_prompt = translate_prompt(positive_prompt, negative_prompt)
-            reply_message += '\n' + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["TRANSLATE"]
+            reply_message += '\n' + get_user_locale(ctx.author.id)["MESSAGE"]["TRANSLATE"]
         if '{' in args['positive_prompt']+args['negative_prompt'] or '}' in args['positive_prompt']+args['negative_prompt']:
-            reply_message += '\n' + random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["BRACKET"])
+            reply_message += '\n' + random.choice(get_user_locale(ctx.author.id)["MESSAGE"]["BRACKET"])
         if args['batch_size'] == 1:
             await ctx.reply(reply_message)
             response = await ui.generate_image(
@@ -281,7 +283,7 @@ if use_webui:
             json_data = json.load(f)
         positive_prompt = json_data['prompt'].replace('{', '(').replace('}', ')')
         negative_prompt = json_data["negative_prompt"].replace('{', '(').replace('}', ')')
-        reply_message = random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["ELEMENTAL_CODE"])
+        reply_message = random.choice(get_user_locale(ctx.author.id)["MESSAGE"]["ELEMENTAL_CODE"])
         reply_message += '\n sd ' + positive_prompt + '\n -u ' + negative_prompt
         await ctx.reply(reply_message)
         if 'width' not in json_data:
@@ -319,7 +321,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["RESPONSE"]))
+        await ctx.reply(random.choice(get_user_locale(ctx.author.id)["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], True)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
@@ -340,7 +342,7 @@ if use_novelai:
         except ValueError as e:
             await ctx.reply(e)
             return
-        await ctx.reply(random.choice(locales[get_user_locale(ctx.author.id)]["MESSAGE"]["RESPONSE"]))
+        await ctx.reply(random.choice(get_user_locale(ctx.author.id)["MESSAGE"]["RESPONSE"]))
         image_data = await nai.generate(args["positive_prompt"], (512, 768), args["negative_prompt"], False)
         image_filename = str(uuid.uuid4())
         save_image(image_data, image_filename)
@@ -352,15 +354,15 @@ if use_novelai:
 
 @bot.command(name='help')
 async def help(ctx):
-    help_message = locales[get_user_locale(ctx.author.id)]["MESSAGE"]["HELP"]['start']
+    help_message = get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['start']
     if use_webui:
-        help_message += '\n\n' + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["HELP"]['sd']
+        help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['sd']
     if use_novelai:
-        help_message += '\n\n' if help_message != "" else "" + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["HELP"]['sfw']
-        help_message += '\n\n' + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["HELP"]['nsfw']
-    help_message += '\n\n' + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["HELP"]['ele']
-    help_message += '\n\n' + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["HELP"]['locale']
-    help_message += '\n\n' + locales[get_user_locale(ctx.author.id)]["MESSAGE"]["HELP"]['help']
+        help_message += '\n\n' if help_message != "" else "" + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['sfw']
+        help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['nsfw']
+    help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['ele']
+    help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['locale']
+    help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['help']
     await ctx.reply(help_message)
 
 @bot.event
