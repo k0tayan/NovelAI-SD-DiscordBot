@@ -26,7 +26,3 @@ def set_bot_locale(locale_name: str) -> None:
         raise ValueError("Invalid locale name")
     else:
         _current_locale_name.set(locale_name)
-
-class Locale:
-    def __init__(self, bot):
-        self.bot = bot
