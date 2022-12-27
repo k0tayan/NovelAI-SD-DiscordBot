@@ -15,7 +15,8 @@ import asyncio
 from utils import locale
 
 COGS = [
-    'cogs.locale'
+    'cogs.locale',
+    'cogs.help'
 ]
 
 load_dotenv()
@@ -340,19 +341,6 @@ if use_novelai:
         file = discord.File(io.BytesIO(image_data), filename="image.jpg")
         message = await ctx.reply(file=file)
         await message.add_reaction(config['REACTION']["DELETE"])
-
-@bot.command(name='help')
-async def help(ctx):
-    help_message = get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['start']
-    if use_webui:
-        help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['sd']
-    if use_novelai:
-        help_message += '\n\n' if help_message != "" else "" + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['sfw']
-        help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['nsfw']
-    help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['ele']
-    help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['locale']
-    help_message += '\n\n' + get_user_locale(ctx.author.id)["MESSAGE"]["HELP"]['help']
-    await ctx.reply(help_message)
 
 @bot.event
 async def on_message(message):
