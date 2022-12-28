@@ -16,14 +16,15 @@ Discord Bot to generate images using StableDiffusion and NovelAI
 - `sd prompt -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size] -t(translate prompt)`
   - Generate images with stable-diffusion-webui
   - You must run stable-diffusion-webui with `--api` option in `COMMANDLINE_ARGS`
-- `sfw prompt -u [negative_prompt]`
-  - Generate images with NovelAI Curated Model
-- `nsfw prompt -u [negative_prompt]`
-  - Generate images with NovelAI Full Model
+- `nai prompt -u [negative_prompt] -m [model]`
+  - Generate images with NovelAI
+  - model: 0=Curated, 1=Full
 - `ele`
   - Generate images form elemental code prompt
-- `locale`
+- `locale [locale]`
   - Set locale
+- `locale`
+  - Show current locale
 - `locales`
   - Show available locales
 - `help`
