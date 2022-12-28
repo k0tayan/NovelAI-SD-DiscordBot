@@ -34,16 +34,14 @@ MESSAGE:
       -h [画像の高さ]
       -b [バッチサイズ]
       -t(翻訳するかどうか、しない場合はつけなくて良い)
-    sfw: |-
-      `sfw プロンプト`
-      NovelAIのCurated Modelを用いて、プロンプトの内容で画像を生成します
+    nai: |-
+      `nai プロンプト`
+      NovelAIを用いて、プロンプトの内容で画像を生成します
       以下のオプションがあります
       -u [ネガティブプロンプト]
-    nsfw: |-
-      `nsfw prompt`
-      NovelAIのFull Modelを用いて、プロンプトの内容で画像を生成します
-      以下のオプションがあります
-       -u [ネガティブプロンプト]
+      -m [model]
+      model: 0=Curated, 1=Full
+      FullはNSFWチャンネル専用です
     ele: |-
       `ele`
       元素法典からランダムに選択した呪文で画像を生成します

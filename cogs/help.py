@@ -27,8 +27,7 @@ class Help(commands.Cog):
                 help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['sd']
                 help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['ele']
             if config['USE_NOVELAI']:
-                help_message += '\n\n' if help_message != "" else "" + user_locale["MESSAGE"]["HELP"]['sfw']
-                help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['nsfw']
+                help_message += '\n\n' if help_message != "" else "" + user_locale["MESSAGE"]["HELP"]['nai']
             help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['locale']
             help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['help']
             await ctx.reply(help_message)

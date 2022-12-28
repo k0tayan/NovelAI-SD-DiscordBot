@@ -50,6 +50,22 @@ def parse_prompt(prompt: tuple) -> dict:
     }
     return response
 
+def parse_prompt_nai(prompt: tuple) -> dict:
+    prompt = list(prompt)
+    model = parse_option(prompt, '-m', [0, 1, 0])
+    # negative_promptの処理
+    n = (lambda x : x.index('-u') if '-u' in x else -1)(prompt)
+    if n >= len(prompt)-1:
+        raise ValueError({'message':'INVALID_NEGATIVE_PROMPT'})
+    negative_prompt = ' '.join("" if n == -1 else prompt[n+1:])
+    positive_prompt = ' '.join(prompt if n == -1 else prompt[:n])
+    response = {
+        'positive_prompt': positive_prompt,
+        'negative_prompt': negative_prompt,
+        'model': model
+    }
+    return response
+
 def translate_prompt(positive_prompt: str, negative_prompt: str) -> dict:
     if not config['USE_GOOGLE_TRANS']:
         return positive_prompt, negative_prompt

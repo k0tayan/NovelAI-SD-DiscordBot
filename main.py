@@ -41,5 +41,7 @@ if __name__ == '__main__':
         if config['USE_WEBUI']:
             await bot.load_extension('cogs.sd')
             await bot.load_extension('cogs.link_expand')
+        if config['USE_NOVELAI']:
+            await bot.load_extension('cogs.nai')
         await bot.start(os.getenv('DISCORD_TOKEN'))
     asyncio.run(main())    
