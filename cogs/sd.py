@@ -48,7 +48,7 @@ class StableDiffusionCog(commands.Cog):
         if not config['USE_WEBUI']:
             self.logger.info('WebUI is not enabled')
             return
-        user_locale = locale.get_bot_locale()
+        user_locale = locale.get_user_locale(ctx.author.id)
         if(ctx.guild is None):
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
         else:
@@ -129,7 +129,7 @@ class StableDiffusionCog(commands.Cog):
         if not config['USE_WEBUI']:
             self.logger.info('WebUI is not enabled')
             return
-        user_locale = locale.get_bot_locale()
+        user_locale = locale.get_user_locale(ctx.author.id)
         try:
             element = random.choice(self.elemental_code)
             positive_prompt = element['prompt'].replace('{', '(').replace('}', ')')

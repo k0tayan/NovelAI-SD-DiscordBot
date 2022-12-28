@@ -8,20 +8,23 @@ class Locale(commands.Cog):
     @commands.command(name='locale')
     async def locale(self, ctx: commands.Context, locale_name: str=None):
         """locale [locale_name]"""
+        user_locale = locale.get_user_locale(ctx.author.id)
         if locale_name is None:
-            locale_message = locale.get_bot_locale()['MESSAGE']['GET_LOCALE']
+            locale_message = user_locale['MESSAGE']['GET_LOCALE']
             await ctx.reply(locale_message)
             return
         if locale_name in locale.get_all_locale_names():
-            locale.set_bot_locale(locale_name)
-            await ctx.reply(locale.get_bot_locale()['MESSAGE']['SET_LOCALE'])
+            locale.set_user_locale(ctx.author.id, locale_name)
+            user_locale = locale.get_user_locale(ctx.author.id)
+            await ctx.reply(user_locale['MESSAGE']['SET_LOCALE'])
         else:
-            await ctx.reply(locale.get_bot_locale()['ERROR']['INVALID_LOCALE'])
+            await ctx.reply(user_locale['ERROR']['INVALID_LOCALE'])
     
     @commands.command(name='locales')
     async def get_locales(self, ctx: commands.Context):
         """get locales"""
-        locale_message = locale.get_bot_locale()['MESSAGE']['GET_LOCALES'] + '\n'
+        user_locale = locale.get_user_locale(ctx.author.id)
+        locale_message = user_locale['MESSAGE']['GET_LOCALES'] + '\n'
         for locale_name in locale.get_all_locale_names():
             locale_message += f'- {locale_name}\n'
         await ctx.reply(locale_message)

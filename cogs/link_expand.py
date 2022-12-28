@@ -38,7 +38,7 @@ class LinkExpand(commands.Cog):
         if not config['USE_WEBUI']:
             self.logger.info(f'WebUI is not enabled')
             return
-        user_locale = locale.get_bot_locale()
+        user_locale = locale.get_user_locale(ctx.author.id)
         if(ctx.guild is None):
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
         else:
