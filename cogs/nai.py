@@ -49,10 +49,15 @@ class NovelAICog(commands.Cog):
             except ValueError as e:
                 await ctx.reply(e)
                 return
-            self.logger.info(str(args))
             if args['model'] == 1 and not ctx.channel.is_nsfw():
                 await ctx.reply(user_locale['ERROR']['NSFW_ONLY'])
                 return
+            if not ctx.channel.is_nsfw():
+                # 強制的にNSFWを除外する
+                for ng in config['NSFW_EXCLUDE']:
+                    args['positive_prompt'] = args['positive_prompt'].replace(ng, "")
+                args['negative_prompt'] += '(((nsfw)))'
+            self.logger.info(str(args))
             is_safe = args['model'] == 0
             await ctx.reply(random.choice(user_locale['MESSAGE']['RESPONSE']))
             image_data = await novelai.generate_image(

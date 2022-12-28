@@ -13,4 +13,17 @@ SCALE: [1, 20, 11]
 WIDTH: [64, 1024, 512]
 HEIGHT: [64, 1024, 768]
 BATCH_SIZE: [1, 4, 1]
+NSFW_EXCLUDE:
+  [
+    "nsfw",
+    "nude",
+    "fuck",
+    "fucked",
+    "nipples",
+    "vagina",
+    "spread legs",
+    "penis",
+    "breasts",
+    "pantyshot",
+  ]
 ELEMENTAL_CODE_JSON_PATH: elemental_code/json
