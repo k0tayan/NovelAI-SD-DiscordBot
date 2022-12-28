@@ -13,6 +13,7 @@ from collections.abc import Callable
 import json
 import asyncio
 from utils import locale
+from config.load_config import config
 
 COGS = [
     'cogs.locale',
@@ -21,9 +22,6 @@ COGS = [
 
 load_dotenv()
 from google.cloud import translate
-
-with open('config.yml', encoding='utf-8') as file:
-    config = yaml.safe_load(file)
 
 # 全てのロケールを読み込む
 locales = {}
