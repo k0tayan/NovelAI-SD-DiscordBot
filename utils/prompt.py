@@ -13,7 +13,7 @@ def parse_option(prompt: list, option: str, value_range: list[int, int, int], f:
         index = prompt.index(option)
         if index >= len(prompt)-1 or not prompt[index+1].isdecimal():
             raise ValueError({'message': 'INVALID_OPTION', 'args': {'option': option}})
-        if int(prompt[index+1]) < 1 or int(prompt[index+1]) > _max:
+        if int(prompt[index+1]) < _min or int(prompt[index+1]) > _max:
             raise ValueError({'message': 'INVALID_OPTION_RANGE', 'args': {'option': option, 'max': _max, 'min': _min}})
         value = int(prompt[index+1])
         if f is not None:
