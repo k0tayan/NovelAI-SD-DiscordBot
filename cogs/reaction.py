@@ -1,5 +1,5 @@
-from discord.ext import commands
 from config.load_config import config
+from discord.ext import commands
 
 class Reaction(commands.Cog):
     def __init__(self, bot):
