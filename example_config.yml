@@ -27,3 +27,5 @@ NSFW_EXCLUDE:
     "pantyshot",
   ]
 ELEMENTAL_CODE_JSON_PATH: elemental_code/json
+REACTION:
+  DELETE: 🗑️
