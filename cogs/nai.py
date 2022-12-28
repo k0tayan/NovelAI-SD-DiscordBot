@@ -70,3 +70,7 @@ class NovelAICog(commands.Cog):
             self.logger.info('End nai command')
         except Exception as e:
             self.logger.error(e)
+
+
+async def setup(bot):
+    await bot.add_cog(NovelAICog(bot))
