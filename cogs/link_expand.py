@@ -10,6 +10,7 @@ import uuid
 import random
 import io
 
+
 class LinkExpand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -22,24 +23,24 @@ class LinkExpand(commands.Cog):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
-    
-    def save_image(self, image_data:bytes, image_filename:str):
+
+    def save_image(self, image_data: bytes, image_filename: str):
         dir = config['GENERATED_IMAGE_OUTDIR']
         with open(f'{dir}/{image_filename}.jpg', 'wb') as f:
             f.write(image_data)
-    
+
     @checks.is_allowed_guild()
     @checks.is_nsfw()
     @commands.command(name='link')
     async def link_expand(self, ctx: commands.Context, link: str):
         """link [link]"""
 
-        self.logger.info(f'Start link command')
+        self.logger.info('Start link command')
         if not config['USE_WEBUI']:
-            self.logger.info(f'WebUI is not enabled')
+            self.logger.info('WebUI is not enabled')
             return
         user_locale = locale.get_user_locale(ctx.author.id)
-        if(ctx.guild is None):
+        if ctx.guild is None:
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
         else:
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
@@ -47,7 +48,7 @@ class LinkExpand(commands.Cog):
             if link.startswith('https://discord.com/channels/') or \
                 link.startswith('https://discordapp.com/channels/') or \
                 link.startswith('https://canary.discord.com/channels/') or \
-                link.startswith('https://ptb.discord.com/channels/'):
+                    link.startswith('https://ptb.discord.com/channels/'):
                 server_id, channel_id, message_id = link.split('/')[-3:]
                 if server_id is None or channel_id is None or message_id is None:
                     return
@@ -65,7 +66,12 @@ class LinkExpand(commands.Cog):
                     message_text = random.choice(user_locale['MESSAGE']['LINK']) + '\n' + linked_message.content
                     await ctx.reply(message_text)
                     response = await webui.generate_image(
-                        linked_message.content, (512, 768), config['DEFAULT_NEGATIVE_PROMPT'], steps=config['STEPS'][2], scale=config['SCALE'][2])
+                        prompt=linked_message.content,
+                        resolution=(512, 768),
+                        negative_prompt=config['DEFAULT_NEGATIVE_PROMPT'],
+                        steps=config['STEPS'][2],
+                        scale=config['SCALE'][2]
+                    )
                     b64_image = response["images"][0]
                     image_data = base64.b64decode(b64_image)
                     image_filename = str(uuid.uuid4())
@@ -76,6 +82,7 @@ class LinkExpand(commands.Cog):
                     self.logger.info(f'Saved image: {image_filename}.jpg')
         except Exception as e:
             self.logger.error(e)
+
 
 async def setup(bot):
     await bot.add_cog(LinkExpand(bot))

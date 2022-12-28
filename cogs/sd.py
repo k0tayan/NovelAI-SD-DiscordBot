@@ -13,6 +13,7 @@ import io
 import json
 import os
 
+
 class StableDiffusionCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -23,7 +24,7 @@ class StableDiffusionCog(commands.Cog):
             with open(json_path, 'r', encoding='utf-8') as f:
                 json_data = json.load(f)
                 self.elemental_code.append(json_data)
-        
+
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
@@ -32,8 +33,8 @@ class StableDiffusionCog(commands.Cog):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
-    
-    def save_image(self, image_data:bytes, image_filename:str):
+
+    def save_image(self, image_data: bytes, image_filename: str):
         dir = config['GENERATED_IMAGE_OUTDIR']
         with open(f'{dir}/{image_filename}.jpg', 'wb') as f:
             f.write(image_data)
@@ -44,12 +45,12 @@ class StableDiffusionCog(commands.Cog):
     async def generate_with_sd(self, ctx: commands.Context, *prompt):
         """sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size] -t(translate prompt)"""
 
-        self.logger.info(f'Start sd command')
+        self.logger.info('Start sd command')
         if not config['USE_WEBUI']:
             self.logger.info('WebUI is not enabled')
             return
         user_locale = locale.get_user_locale(ctx.author.id)
-        if(ctx.guild is None):
+        if ctx.guild is None:
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
         else:
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
@@ -62,7 +63,12 @@ class StableDiffusionCog(commands.Cog):
                 if error_message == 'INVALID_OPTION':
                     await ctx.reply(user_locale['ERROR']['INVALID_OPTION'].replace('<option>', error['args']['option']))
                 elif error_message == 'INVALID_OPTION_RANGE':
-                    await ctx.reply(user_locale['ERROR']['INVALID_OPTION_RANGE'].replace('<option>', error['args']['option']).replace('<min>', str(error['args']['min'])).replace('<max>', str(error['args']['max'])))
+                    await ctx.reply(
+                        user_locale['ERROR']['INVALID_OPTION_RANGE'].
+                        replace('<option>', error['args']['option']).
+                        replace('<min>', str(error['args']['min'])).
+                        replace('<max>', str(error['args']['max']))
+                    )
                 elif error_message == 'WIDTH_NOT_MULTIPLE_OF_64':
                     await ctx.reply(user_locale['ERROR']['WIDTH_NOT_MULTIPLE_OF_64'])
                 elif error_message == 'HEIGHT_NOT_MULTIPLE_OF_64':
@@ -86,7 +92,12 @@ class StableDiffusionCog(commands.Cog):
             if args['batch_size'] == 1:
                 await ctx.reply(reply_message)
                 response = await webui.generate_image(
-                    positive_prompt, (args['width'], args['height']), config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt, steps=args['steps'], scale=args['scale'])
+                    prompt=positive_prompt,
+                    resolution=(args['width'], args['height']),
+                    negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt,
+                    steps=args['steps'],
+                    scale=args['scale']
+                )
                 b64_image = response['images'][0]
                 image_data = base64.b64decode(b64_image)
                 image_filename = str(uuid.uuid4())
@@ -102,7 +113,13 @@ class StableDiffusionCog(commands.Cog):
                 else:
                     await ctx.reply(reply_message)
                 response = await webui.generate_image(
-                    positive_prompt, (args['width'], args['height']), config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt, steps=args['steps'], scale=args['scale'], batch_size=args['batch_size'])
+                    prompt=positive_prompt,
+                    resolution=(args['width'], args['height']),
+                    negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt,
+                    steps=args['steps'],
+                    scale=args['scale'],
+                    batch_size=args['batch_size']
+                )
                 for b64_image in response['images']:
                     image_data = base64.b64decode(b64_image)
                     image_filename = str(uuid.uuid4())
@@ -118,7 +135,7 @@ class StableDiffusionCog(commands.Cog):
         except Exception as e:
             self.logger.error(e)
         self.logger.info('End sd command')
-    
+
     @checks.is_allowed_guild()
     @checks.is_nsfw()
     @commands.command(name='ele')
@@ -146,7 +163,13 @@ class StableDiffusionCog(commands.Cog):
             if 'cfg_scale' not in element:
                 element['cfg_scale'] = config['SCALE'][2]
             response = await webui.generate_image(
-                    positive_prompt, (element['width'][0], element['height'][0]), negative_prompt, steps=element['steps'][0], scale=element['cfg_scale'][0], batch_size=1)
+                prompt=positive_prompt,
+                resolution=(element['width'][0], element['height'][0]),
+                negative_prompt=negative_prompt,
+                steps=element['steps'][0],
+                scale=element['cfg_scale'][0],
+                batch_size=1
+            )
             b64_image = response['images'][0]
             image_data = base64.b64decode(b64_image)
             image_filename = str(uuid.uuid4())
@@ -157,6 +180,7 @@ class StableDiffusionCog(commands.Cog):
             self.logger.info(f'Saved image: {image_filename}.jpg')
         except Exception as e:
             self.logger.error(e)
+
 
 async def setup(bot):
     await bot.add_cog(StableDiffusionCog(bot))

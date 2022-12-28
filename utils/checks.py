@@ -2,12 +2,14 @@ from config.load_config import config
 from discord.ext import commands
 from utils import locale
 
+
 def bypass_admin(func):
     def predicate(ctx):
         if ctx.author.id in config['ADMIN_IDS']:
             return True
         return func(ctx)
     return predicate
+
 
 def is_allowed_guild():
     @bypass_admin
@@ -20,6 +22,7 @@ def is_allowed_guild():
         await ctx.reply(locale.get_bot_locale()['ERROR']['UNAUTHORIZED_SERVER'])
         return False
     return commands.check(predicate)
+
 
 def is_nsfw():
     @bypass_admin

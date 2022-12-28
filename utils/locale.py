@@ -1,5 +1,4 @@
 from config.load_config import config
-from discord.ext import commands
 
 import os
 import yaml
@@ -12,17 +11,21 @@ for i in os.listdir('locales'):
 
 _user_locale = {}
 
+
 def get_all_locale_names() -> list:
     """Get all locale names"""
     return list(_locales.keys())
+
 
 def get_bot_locale() -> dict:
     """Get the bot locale"""
     return _locales[_bot_locale_name]
 
+
 def get_bot_locale_name() -> str:
     """Get the bot locale name"""
     return _bot_locale_name
+
 
 def set_bot_locale(locale_name: str) -> None:
     """Set the locale for bot"""
@@ -32,12 +35,14 @@ def set_bot_locale(locale_name: str) -> None:
         global _bot_locale_name
         _bot_locale_name = locale_name
 
+
 def get_user_locale(user_id: int) -> dict:
     """Get the user locale"""
     if user_id in _user_locale:
         return _user_locale[user_id]
     else:
         return get_bot_locale()
+
 
 def set_user_locale(user_id: int, locale_name: str) -> None:
     """Set the locale for user"""

@@ -3,6 +3,7 @@ from discord.ext import commands
 from utils import locale
 import logging
 
+
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -15,7 +16,7 @@ class Help(commands.Cog):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
-    
+
     @commands.command(name='help')
     async def help(self, ctx: commands.Context):
         """help"""
@@ -27,12 +28,13 @@ class Help(commands.Cog):
                 help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['sd']
                 help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['ele']
             if config['USE_NOVELAI']:
-                help_message += '\n\n' if help_message != "" else "" + user_locale["MESSAGE"]["HELP"]['nai']
+                help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['nai']
             help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['locale']
             help_message += '\n\n' + user_locale["MESSAGE"]["HELP"]['help']
             await ctx.reply(help_message)
         except Exception as error:
             self.logger.error(error)
+
 
 async def setup(bot):
     await bot.add_cog(Help(bot))

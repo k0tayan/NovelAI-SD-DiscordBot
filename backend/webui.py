@@ -1,7 +1,8 @@
 from config.load_config import config
 import aiohttp
 
-async def generate_image(prompt: str, resolution: tuple, negative_prompt: str, seed:int = -1, steps:int = 20, scale:int = 12, batch_size:int = 1) -> dict:
+
+async def generate_image(prompt: str, resolution: tuple, negative_prompt: str, seed: int = -1, steps: int = 20, scale: int = 12, batch_size: int = 1) -> dict:
     """Generate an image from a prompt."""
     uri = config['WEBUI_URI'] + '/sdapi/v1'
     endpoint = '/txt2img'

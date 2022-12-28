@@ -1,6 +1,7 @@
 from config.load_config import config
 from discord.ext import commands
 
+
 class Reaction(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -18,6 +19,7 @@ class Reaction(commands.Cog):
                     await message.delete()
                 else:
                     await message.delete()
+
 
 async def setup(bot):
     await bot.add_cog(Reaction(bot))

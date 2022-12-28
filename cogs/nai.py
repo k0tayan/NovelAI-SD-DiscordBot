@@ -10,6 +10,7 @@ import uuid
 import random
 import io
 
+
 class NovelAICog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -22,8 +23,8 @@ class NovelAICog(commands.Cog):
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
         self.logger.propagate = False
-    
-    def save_image(self, image_data:bytes, image_filename:str):
+
+    def save_image(self, image_data: bytes, image_filename: str):
         dir = config['GENERATED_IMAGE_OUTDIR']
         with open(f'{dir}/{image_filename}.jpg', 'wb') as f:
             f.write(image_data)
@@ -38,7 +39,7 @@ class NovelAICog(commands.Cog):
             self.logger.info('NovelAI is not enabled')
             return
         user_locale = locale.get_user_locale(ctx.author.id)
-        if(ctx.guild is None):
+        if ctx.guild is None:
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
         else:
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
@@ -54,7 +55,12 @@ class NovelAICog(commands.Cog):
                 return
             is_safe = args['model'] == 0
             await ctx.reply(random.choice(user_locale['MESSAGE']['RESPONSE']))
-            image_data = await novelai.generate_image(args['positive_prompt'], (512, 768), args['negative_prompt'], is_safe)
+            image_data = await novelai.generate_image(
+                prompt=args['positive_prompt'],
+                resolution=(512, 768),
+                negative_prompt=args['negative_prompt'],
+                is_safe=is_safe
+            )
             image_filename = str(uuid.uuid4())
             file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
             message = await ctx.reply(file=file)

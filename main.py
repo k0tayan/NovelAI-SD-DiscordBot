@@ -23,9 +23,11 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.propagate = False
 
+
 @bot.event
 async def on_ready():
     logger.info('We have logged in as {0.user}'.format(bot))
+
 
 # コマンドが存在しない場合にエラーを出さない
 @bot.event
@@ -44,4 +46,4 @@ if __name__ == '__main__':
         if config['USE_NOVELAI']:
             await bot.load_extension('cogs.nai')
         await bot.start(os.getenv('DISCORD_TOKEN'))
-    asyncio.run(main())    
+    asyncio.run(main())
