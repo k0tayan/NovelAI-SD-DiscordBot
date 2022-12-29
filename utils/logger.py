@@ -1,4 +1,5 @@
 from config.load_config import config
+from discord.ext import commands
 import logging
 
 import uuid
@@ -22,3 +23,24 @@ class MyLogger(logging.Logger):
             f.write(image_data)
         self.info(f'Saved image: {image_filename}.jpg')
         return image_filename
+
+    @classmethod
+    def log_command(cls, func):
+        async def decorator(cls, *args, **kwargs):
+            ctx: commands.Context = args[0]
+            content = ctx.message.content.split(' ')
+            command_name = content[0]
+            command_args = content[1:]
+            cls.logger.info(f'Command {command_name} start')
+            cls.logger.info(f'Args: {command_args}')
+            if ctx.guild is None:
+                cls.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
+            else:
+                cls.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
+            try:
+                result = await func(cls, *args, **kwargs)
+            except Exception as e:
+                cls.logger.error(e)
+            cls.logger.info(f'Command {command_name} end')
+            return result
+        return decorator

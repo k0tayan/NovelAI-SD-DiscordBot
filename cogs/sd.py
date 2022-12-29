@@ -13,6 +13,13 @@ import json
 import os
 
 
+def test(func):
+    async def wrapper(cls, *args, **kwargs):
+        print('test')
+        return await func(cls, *args, **kwargs)
+    return wrapper
+
+
 class StableDiffusionCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -29,18 +36,14 @@ class StableDiffusionCog(commands.Cog):
     @checks.is_allowed_guild()
     @checks.is_nsfw()
     @commands.command(name='sd')
+    @MyLogger.log_command
     async def generate_with_sd(self, ctx: commands.Context, *args):
         """sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size] -t(translate prompt)"""
 
-        self.logger.info('Start sd command')
         if not config['USE_WEBUI']:
             self.logger.info('WebUI is not enabled')
             return
         user_locale = locale.get_user_locale(ctx.author.id)
-        if ctx.guild is None:
-            self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
-        else:
-            self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
         try:
             try:
                 prompt: StableDiffusionPrompt = parse_prompt(list(args))
@@ -113,15 +116,14 @@ class StableDiffusionCog(commands.Cog):
                         await message.add_reaction(config['REACTION']["DELETE"])
         except Exception as e:
             self.logger.error(e)
-        self.logger.info('End sd command')
 
     @checks.is_allowed_guild()
     @checks.is_nsfw()
     @commands.command(name='ele')
+    @MyLogger.log_command
     async def generate_with_ele(self, ctx: commands.Context):
         """Generate an image with an elemental code prompt."""
 
-        self.logger.info('Start ele command')
         if not config['USE_WEBUI']:
             self.logger.info('WebUI is not enabled')
             return
