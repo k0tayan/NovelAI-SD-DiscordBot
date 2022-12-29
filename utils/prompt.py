@@ -35,6 +35,14 @@ class NovelAIPrompt:
     prompt: str
     negative_prompt: str
     model: int
+    original_prompt: str = None
+    original_negative_prompt: str = None
+
+    def __post_init__(self):
+        self.original_prompt = self.prompt
+        self.original_negative_prompt = self.negative_prompt
+        self.prompt = self.prompt.replace('(', '{').replace(')', '}')
+        self.negative_prompt = self.negative_prompt.replace('(', '{').replace(')', '}')
 
 
 def parse_option(prompt: list, option: str, value_range: list[int, int, int] = None, f: Callable = None, error: ValueError = None) -> int:
