@@ -4,7 +4,7 @@ from discord.ext import commands
 from utils import locale, checks
 import logging
 
-from utils.prompt import parse_prompt, translate_prompt
+from utils.prompt import parse_prompt, translate_prompt, StableDiffusionPrompt
 from backend import webui
 import base64
 import uuid
@@ -42,7 +42,7 @@ class StableDiffusionCog(commands.Cog):
     @checks.is_allowed_guild()
     @checks.is_nsfw()
     @commands.command(name='sd')
-    async def generate_with_sd(self, ctx: commands.Context, *prompt):
+    async def generate_with_sd(self, ctx: commands.Context, *args):
         """sd [positive_prompt] -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size] -t(translate prompt)"""
 
         self.logger.info('Start sd command')
@@ -56,7 +56,7 @@ class StableDiffusionCog(commands.Cog):
             self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
         try:
             try:
-                args = parse_prompt(prompt)
+                prompt: StableDiffusionPrompt = parse_prompt(list(args))
             except ValueError as e:
                 error = e.args[0]
                 error_message = error['message']
@@ -78,25 +78,25 @@ class StableDiffusionCog(commands.Cog):
                 else:
                     await ctx.reply(error_message)
                 return
-            self.logger.info(str(args))
+            self.logger.info(prompt)
             reply_message = random.choice(user_locale['MESSAGE']['RESPONSE'])
-            if args['steps'] != config['STEPS'][2]:
-                reply_message += '\n' + random.choice(user_locale['MESSAGE']['STEPS']).replace('<0>', str(args['steps']))
-            positive_prompt = args['positive_prompt'].replace('{', '(').replace('}', ')')
-            negative_prompt = args['negative_prompt'].replace('{', '(').replace('}', ')')
-            if args['translate']:
+            if prompt.steps != config['STEPS'][2]:
+                reply_message += '\n' + random.choice(user_locale['MESSAGE']['STEPS']).replace('<0>', str(prompt.steps))
+            positive_prompt = prompt.prompt.replace('{', '(').replace('}', ')')
+            negative_prompt = prompt.negative_prompt.replace('{', '(').replace('}', ')')
+            if prompt.translate:
                 positive_prompt, negative_prompt = translate_prompt(positive_prompt, negative_prompt)
                 reply_message += '\n' + user_locale['MESSAGE']['TRANSLATE']
-            if '{' in args['positive_prompt']+args['negative_prompt'] or '}' in args['positive_prompt']+args['negative_prompt']:
+            if '{' in prompt.prompt+prompt.negative_prompt or '}' in prompt.prompt+prompt.negative_prompt:
                 reply_message += '\n' + random.choice(user_locale['MESSAGE']['BRACKET'])
-            if args['batch_size'] == 1:
+            if prompt.batch_size == 1:
                 await ctx.reply(reply_message)
                 response = await webui.generate_image(
                     prompt=positive_prompt,
-                    resolution=(args['width'], args['height']),
+                    resolution=(prompt.width, prompt.height),
                     negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt,
-                    steps=args['steps'],
-                    scale=args['scale']
+                    steps=prompt.steps,
+                    scale=prompt.scale,
                 )
                 b64_image = response['images'][0]
                 image_data = base64.b64decode(b64_image)
@@ -114,11 +114,11 @@ class StableDiffusionCog(commands.Cog):
                     await ctx.reply(reply_message)
                 response = await webui.generate_image(
                     prompt=positive_prompt,
-                    resolution=(args['width'], args['height']),
+                    resolution=(prompt.width, prompt.height),
                     negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt,
-                    steps=args['steps'],
-                    scale=args['scale'],
-                    batch_size=args['batch_size']
+                    steps=prompt.steps,
+                    scale=prompt.scale,
+                    batch_size=prompt.batch_size,
                 )
                 for b64_image in response['images']:
                     image_data = base64.b64decode(b64_image)

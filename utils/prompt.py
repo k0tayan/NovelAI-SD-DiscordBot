@@ -5,6 +5,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 from google.cloud import translate
+from dataclasses import dataclass
+
+
+@dataclass
+class StableDiffusionPrompt:
+    prompt: str
+    negative_prompt: str
+    steps: int
+    scale: int
+    width: int
+    height: int
+    batch_size: int
+    translate: bool
 
 
 def parse_option(prompt: list, option: str, value_range: list[int, int, int], f: Callable = None, error: ValueError = None) -> int:
@@ -27,29 +40,28 @@ def parse_option(prompt: list, option: str, value_range: list[int, int, int], f:
     return value
 
 
-def parse_prompt(prompt: tuple) -> dict:
-    prompt = list(prompt)
-    scale = parse_option(prompt, '-c', config['SCALE'])
-    steps = parse_option(prompt, '-s', config['STEPS'])
-    width = parse_option(prompt, '-w', config['WIDTH'], lambda x: x % 64 == 0, ValueError({'message': 'WIDTH_NOT_MULTIPLE_OF_64'}))
-    height = parse_option(prompt, '-h', config['HEIGHT'], lambda x: x % 64 == 0, ValueError({'message': 'HEIGHT_NOT_MULTIPLE_OF_64'}))
-    batch_size = parse_option(prompt, '-b', config['BATCH_SIZE'])
+def parse_prompt(args: list) -> StableDiffusionPrompt:
+    scale = parse_option(args, '-c', config['SCALE'])
+    steps = parse_option(args, '-s', config['STEPS'])
+    width = parse_option(args, '-w', config['WIDTH'], lambda x: x % 64 == 0, ValueError({'message': 'WIDTH_NOT_MULTIPLE_OF_64'}))
+    height = parse_option(args, '-h', config['HEIGHT'], lambda x: x % 64 == 0, ValueError({'message': 'HEIGHT_NOT_MULTIPLE_OF_64'}))
+    batch_size = parse_option(args, '-b', config['BATCH_SIZE'])
     # negative_promptの処理
-    n = (lambda x: x.index('-u') if '-u' in x else -1)(prompt)
-    if n >= len(prompt)-1:
+    n = (lambda x: x.index('-u') if '-u' in x else -1)(args)
+    if n >= len(args)-1:
         raise ValueError({'message': 'INVALID_NEGATIVE_PROMPT'})
-    negative_prompt = ' '.join("" if n == -1 else prompt[n+1:])
-    positive_prompt = ' '.join(prompt if n == -1 else prompt[:n])
-    response = {
-        'positive_prompt': positive_prompt,
-        'negative_prompt': negative_prompt,
-        'steps': steps,
-        'scale': scale,
-        'width': width,
-        'height': height,
-        'batch_size': batch_size,
-        'translate': '-t' in prompt
-    }
+    negative_prompt = ' '.join("" if n == -1 else args[n+1:])
+    _prompt = ' '.join(args if n == -1 else args[:n])
+    response = StableDiffusionPrompt(
+        prompt=_prompt,
+        negative_prompt=negative_prompt,
+        steps=steps,
+        scale=scale,
+        width=width,
+        height=height,
+        batch_size=batch_size,
+        translate='-t' in args
+    )
     return response
 
 
