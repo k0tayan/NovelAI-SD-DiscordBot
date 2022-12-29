@@ -30,9 +30,16 @@ class StableDiffusionPrompt:
             self.prompt, self.negative_prompt = translate_prompt(self.prompt, self.negative_prompt)
 
 
+@dataclass
+class NovelAIPrompt:
+    prompt: str
+    negative_prompt: str
+    model: int
+
+
 def parse_option(prompt: list, option: str, value_range: list[int, int, int] = None, f: Callable = None, error: ValueError = None) -> int:
     if value_range is None:
-        index = prompt.index(option)
+        index = (lambda x: x.index(option) if option in x else -1)(prompt)
         if index > 0:
             prompt.pop(index)
             return True
@@ -91,12 +98,12 @@ def parse_prompt_nai(prompt: tuple) -> dict:
     if n >= len(prompt)-1:
         raise ValueError({'message': 'INVALID_NEGATIVE_PROMPT'})
     negative_prompt = ' '.join("" if n == -1 else prompt[n+1:])
-    positive_prompt = ' '.join(prompt if n == -1 else prompt[:n])
-    response = {
-        'positive_prompt': positive_prompt,
-        'negative_prompt': negative_prompt,
-        'model': model
-    }
+    _prompt = ' '.join(prompt if n == -1 else prompt[:n])
+    response = NovelAIPrompt(
+        prompt=_prompt,
+        negative_prompt=negative_prompt,
+        model=model
+    )
     return response
 
 
