@@ -2,12 +2,11 @@ from config.load_config import config
 import discord
 from discord.ext import commands
 from utils import locale, checks
-import logging
+from utils.logger import MyLogger
 
 from utils.prompt import parse_prompt, translate_prompt, StableDiffusionPrompt
 from backend import webui
 import base64
-import uuid
 import random
 import io
 import json
@@ -25,19 +24,7 @@ class StableDiffusionCog(commands.Cog):
                 json_data = json.load(f)
                 self.elemental_code.append(json_data)
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
-
-    def save_image(self, image_data: bytes, image_filename: str):
-        dir = config['GENERATED_IMAGE_OUTDIR']
-        with open(f'{dir}/{image_filename}.jpg', 'wb') as f:
-            f.write(image_data)
+        self.logger = MyLogger(__name__)
 
     @checks.is_allowed_guild()
     @checks.is_nsfw()
@@ -98,14 +85,11 @@ class StableDiffusionCog(commands.Cog):
                     steps=prompt.steps,
                     scale=prompt.scale,
                 )
-                b64_image = response['images'][0]
-                image_data = base64.b64decode(b64_image)
-                image_filename = str(uuid.uuid4())
+                image_data = base64.b64decode(response['images'][0])
+                image_filename = self.logger.save_image(image_data)
                 file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
                 message = await ctx.reply(file=file)
                 await message.add_reaction(config['REACTION']['DELETE'])
-                self.save_image(image_data, image_filename)
-                self.logger.info(f'Saved image: {image_filename}.jpg')
             else:
                 if type(ctx.message.channel) is discord.channel.TextChannel:
                     thread = await ctx.message.create_thread(name=" ".join(prompt)[:100])
@@ -122,7 +106,7 @@ class StableDiffusionCog(commands.Cog):
                 )
                 for b64_image in response['images']:
                     image_data = base64.b64decode(b64_image)
-                    image_filename = str(uuid.uuid4())
+                    image_filename = self.logger.save_image(image_data)
                     file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
                     if type(ctx.message.channel) is discord.channel.TextChannel:
                         message = await thread.send(file=file)
@@ -130,8 +114,6 @@ class StableDiffusionCog(commands.Cog):
                     else:
                         message = await ctx.reply(file=file)
                         await message.add_reaction(config['REACTION']["DELETE"])
-                    self.save_image(image_data, image_filename)
-                    self.logger.info(f'Saved image: {image_filename}.jpg')
         except Exception as e:
             self.logger.error(e)
         self.logger.info('End sd command')
@@ -170,14 +152,11 @@ class StableDiffusionCog(commands.Cog):
                 scale=element['cfg_scale'][0],
                 batch_size=1
             )
-            b64_image = response['images'][0]
-            image_data = base64.b64decode(b64_image)
-            image_filename = str(uuid.uuid4())
+            image_data = base64.b64decode(response['images'][0])
+            image_filename = self.logger.save_image(image_data)
             file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
             message = await ctx.reply(file=file)
             await message.add_reaction(config['REACTION']['DELETE'])
-            self.save_image(image_data, image_filename)
-            self.logger.info(f'Saved image: {image_filename}.jpg')
         except Exception as e:
             self.logger.error(e)
 

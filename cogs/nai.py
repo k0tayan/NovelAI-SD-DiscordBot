@@ -2,7 +2,7 @@ from config.load_config import config
 import discord
 from discord.ext import commands
 from utils import locale, checks
-import logging
+from utils.logger import MyLogger
 
 from utils.prompt import parse_prompt_nai
 from backend import novelai
@@ -15,19 +15,7 @@ class NovelAICog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
-
-    def save_image(self, image_data: bytes, image_filename: str):
-        dir = config['GENERATED_IMAGE_OUTDIR']
-        with open(f'{dir}/{image_filename}.jpg', 'wb') as f:
-            f.write(image_data)
+        self.logger = MyLogger(__name__)
 
     @checks.is_allowed_guild()
     @commands.command(name='nai')
@@ -66,12 +54,10 @@ class NovelAICog(commands.Cog):
                 negative_prompt=args['negative_prompt'],
                 is_safe=is_safe
             )
-            image_filename = str(uuid.uuid4())
+            image_filename = self.logger.save_image(image_data)
             file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
             message = await ctx.reply(file=file)
             await message.add_reaction(config['REACTION']['DELETE'])
-            self.save_image(image_data, image_filename)
-            self.logger.info(f'Saved image: {image_filename}.jpg')
             self.logger.info('End nai command')
         except Exception as e:
             self.logger.error(e)

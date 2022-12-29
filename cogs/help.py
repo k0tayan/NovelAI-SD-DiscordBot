@@ -1,21 +1,14 @@
 from config.load_config import config
 from discord.ext import commands
 from utils import locale
-import logging
+from utils.logger import MyLogger
 
 
 class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
+        self.logger = MyLogger(__name__)
 
     @commands.command(name='help')
     async def help(self, ctx: commands.Context):

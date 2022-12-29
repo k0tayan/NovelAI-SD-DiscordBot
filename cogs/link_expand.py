@@ -2,7 +2,7 @@ from config.load_config import config
 import discord
 from discord.ext import commands
 from utils import locale, checks
-import logging
+from utils.logger import MyLogger
 
 from backend import webui
 import base64
@@ -14,15 +14,8 @@ import io
 class LinkExpand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(name)s : %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
-        self.logger.propagate = False
+   
+        self.logger = MyLogger(__name__)
 
     def save_image(self, image_data: bytes, image_filename: str):
         dir = config['GENERATED_IMAGE_OUTDIR']
@@ -72,14 +65,11 @@ class LinkExpand(commands.Cog):
                         steps=config['STEPS'][2],
                         scale=config['SCALE'][2]
                     )
-                    b64_image = response["images"][0]
-                    image_data = base64.b64decode(b64_image)
-                    image_filename = str(uuid.uuid4())
+                    image_data = base64.b64decode(response["images"][0])
+                    image_filename = self.logger.save_image(image_data)
                     file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
                     sent_message = await ctx.reply(file=file)
                     await sent_message.add_reaction(config['REACTION']["DELETE"])
-                    self.save_image(image_data, image_filename)
-                    self.logger.info(f'Saved image: {image_filename}.jpg')
         except Exception as e:
             self.logger.error(e)
 
