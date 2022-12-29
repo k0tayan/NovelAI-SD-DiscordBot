@@ -92,7 +92,7 @@ class StableDiffusionCog(commands.Cog):
                 await message.add_reaction(config['REACTION']['DELETE'])
             else:
                 if type(ctx.message.channel) is discord.channel.TextChannel:
-                    thread = await ctx.message.create_thread(name=" ".join(prompt)[:100])
+                    thread = await ctx.message.create_thread(name=positive_prompt[:100])
                     await thread.send(reply_message)
                 else:
                     await ctx.reply(reply_message)
