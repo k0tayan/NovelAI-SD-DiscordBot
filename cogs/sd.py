@@ -4,7 +4,7 @@ from discord.ext import commands
 from utils import locale, checks
 from utils.logger import MyLogger
 
-from utils.prompt import parse_prompt, translate_prompt, StableDiffusionPrompt
+from utils.prompt import parse_prompt, StableDiffusionPrompt
 from backend import webui
 import base64
 import random

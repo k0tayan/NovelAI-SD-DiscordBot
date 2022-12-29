@@ -3,9 +3,9 @@ from config.load_config import config
 from collections.abc import Callable
 from dotenv import load_dotenv
 
-load_dotenv()
 from google.cloud import translate
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+load_dotenv()
 
 
 @dataclass
