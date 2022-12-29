@@ -89,14 +89,14 @@ class StableDiffusionCog(commands.Cog):
                 await message.add_reaction(config['REACTION']['DELETE'])
             else:
                 if type(ctx.message.channel) is discord.channel.TextChannel:
-                    thread = await ctx.message.create_thread(name=positive_prompt[:100])
+                    thread = await ctx.message.create_thread(name=prompt.prompt[:100])
                     await thread.send(reply_message)
                 else:
                     await ctx.reply(reply_message)
                 response = await webui.generate_image(
-                    prompt=positive_prompt,
+                    prompt=prompt.prompt,
                     resolution=(prompt.width, prompt.height),
-                    negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt,
+                    negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+prompt.negative_prompt,
                     steps=prompt.steps,
                     scale=prompt.scale,
                     batch_size=prompt.batch_size,
