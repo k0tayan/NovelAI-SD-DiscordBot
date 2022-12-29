@@ -13,7 +13,7 @@ import io
 class LinkExpand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-   
+
         self.logger = MyLogger(__name__)
 
     def save_image(self, image_data: bytes, image_filename: str):
