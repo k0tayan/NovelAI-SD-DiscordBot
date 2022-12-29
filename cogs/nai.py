@@ -22,15 +22,10 @@ class NovelAICog(commands.Cog):
     async def generate_with_nai(self, ctx, *args):
         """nai [positive_prompt] -u [negative_prompt] -m [model]"""
 
-        self.logger.info('Start nai command')
         if not config['USE_NOVELAI']:
             self.logger.info('NovelAI is not enabled')
             return
         user_locale = locale.get_user_locale(ctx.author.id)
-        if ctx.guild is None:
-            self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
-        else:
-            self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
         try:
             try:
                 prompt: NovelAIPrompt = parse_prompt_nai(args)
@@ -58,7 +53,6 @@ class NovelAICog(commands.Cog):
             file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
             message = await ctx.reply(file=file)
             await message.add_reaction(config['REACTION']['DELETE'])
-            self.logger.info('End nai command')
         except Exception as e:
             self.logger.error(e)
 

@@ -32,10 +32,6 @@ class LinkExpand(commands.Cog):
             self.logger.info('WebUI is not enabled')
             return
         user_locale = locale.get_user_locale(ctx.author.id)
-        if ctx.guild is None:
-            self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command}')
-        else:
-            self.logger.info(f'{ctx.author}({ctx.author.id}) {ctx.command} in {ctx.guild}({ctx.guild.id})')
         try:
             if link.startswith('https://discord.com/channels/') or \
                 link.startswith('https://discordapp.com/channels/') or \
