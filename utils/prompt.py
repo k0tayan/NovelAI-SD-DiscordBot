@@ -30,7 +30,14 @@ class StableDiffusionPrompt:
             self.prompt, self.negative_prompt = translate_prompt(self.prompt, self.negative_prompt)
 
 
-def parse_option(prompt: list, option: str, value_range: list[int, int, int], f: Callable = None, error: ValueError = None) -> int:
+def parse_option(prompt: list, option: str, value_range: list[int, int, int] = None, f: Callable = None, error: ValueError = None) -> int:
+    if value_range is None:
+        index = prompt.index(option)
+        if index > 0:
+            prompt.pop(index)
+            return True
+        else:
+            return False
     _min, _max, default = value_range
     if option in prompt:
         index = prompt.index(option)
@@ -56,6 +63,7 @@ def parse_prompt(args: list) -> StableDiffusionPrompt:
     width = parse_option(args, '-w', config['WIDTH'], lambda x: x % 64 == 0, ValueError({'message': 'WIDTH_NOT_MULTIPLE_OF_64'}))
     height = parse_option(args, '-h', config['HEIGHT'], lambda x: x % 64 == 0, ValueError({'message': 'HEIGHT_NOT_MULTIPLE_OF_64'}))
     batch_size = parse_option(args, '-b', config['BATCH_SIZE'])
+    translate = parse_option(args, '-t')
     # negative_promptの処理
     n = (lambda x: x.index('-u') if '-u' in x else -1)(args)
     if n >= len(args)-1:
@@ -70,7 +78,7 @@ def parse_prompt(args: list) -> StableDiffusionPrompt:
         width=width,
         height=height,
         batch_size=batch_size,
-        translate='-t' in args
+        translate=translate
     )
     return response
 
