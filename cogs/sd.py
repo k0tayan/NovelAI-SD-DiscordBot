@@ -69,19 +69,16 @@ class StableDiffusionCog(commands.Cog):
             reply_message = random.choice(user_locale['MESSAGE']['RESPONSE'])
             if prompt.steps != config['STEPS'][2]:
                 reply_message += '\n' + random.choice(user_locale['MESSAGE']['STEPS']).replace('<0>', str(prompt.steps))
-            positive_prompt = prompt.prompt.replace('{', '(').replace('}', ')')
-            negative_prompt = prompt.negative_prompt.replace('{', '(').replace('}', ')')
             if prompt.translate:
-                positive_prompt, negative_prompt = translate_prompt(positive_prompt, negative_prompt)
                 reply_message += '\n' + user_locale['MESSAGE']['TRANSLATE']
-            if '{' in prompt.prompt+prompt.negative_prompt or '}' in prompt.prompt+prompt.negative_prompt:
+            if any(['{' in arg or '}' in arg for arg in args]):
                 reply_message += '\n' + random.choice(user_locale['MESSAGE']['BRACKET'])
             if prompt.batch_size == 1:
                 await ctx.reply(reply_message)
                 response = await webui.generate_image(
-                    prompt=positive_prompt,
+                    prompt=prompt.prompt,
                     resolution=(prompt.width, prompt.height),
-                    negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+negative_prompt,
+                    negative_prompt=config['DEFAULT_NEGATIVE_PROMPT']+prompt.prompt,
                     steps=prompt.steps,
                     scale=prompt.scale,
                 )

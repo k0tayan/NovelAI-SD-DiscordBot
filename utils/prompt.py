@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 from google.cloud import translate
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -18,6 +18,16 @@ class StableDiffusionPrompt:
     height: int
     batch_size: int
     translate: bool
+    original_prompt: str = None
+    original_negative_prompt: str = None
+
+    def __post_init__(self):
+        self.original_prompt = self.prompt
+        self.original_negative_prompt = self.negative_prompt
+        self.prompt = self.prompt.replace('{', '(').replace('}', ')')
+        self.negative_prompt = self.negative_prompt.replace('{', '(').replace('}', ')')
+        if self.translate:
+            self.prompt, self.negative_prompt = translate_prompt(self.prompt, self.negative_prompt)
 
 
 def parse_option(prompt: list, option: str, value_range: list[int, int, int], f: Callable = None, error: ValueError = None) -> int:
