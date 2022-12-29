@@ -13,13 +13,6 @@ import json
 import os
 
 
-def test(func):
-    async def wrapper(cls, *args, **kwargs):
-        print('test')
-        return await func(cls, *args, **kwargs)
-    return wrapper
-
-
 class StableDiffusionCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
