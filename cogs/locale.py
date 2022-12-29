@@ -1,5 +1,6 @@
 from discord.ext import commands
 from utils import locale
+from utils.logger import MyLogger
 
 
 class Locale(commands.Cog):
@@ -7,6 +8,7 @@ class Locale(commands.Cog):
         self.bot = bot
 
     @commands.command(name='locale')
+    @MyLogger.log_command
     async def locale(self, ctx: commands.Context, locale_name: str = None):
         """locale [locale_name]"""
         user_locale = locale.get_user_locale(ctx.author.id)
@@ -22,6 +24,7 @@ class Locale(commands.Cog):
             await ctx.reply(user_locale['ERROR']['INVALID_LOCALE'])
 
     @commands.command(name='locales')
+    @MyLogger.log_command
     async def get_locales(self, ctx: commands.Context):
         """get locales"""
         user_locale = locale.get_user_locale(ctx.author.id)

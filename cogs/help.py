@@ -11,6 +11,7 @@ class Help(commands.Cog):
         self.logger = MyLogger(__name__)
 
     @commands.command(name='help')
+    @MyLogger.log_command
     async def help(self, ctx: commands.Context):
         """help"""
 

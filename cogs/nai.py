@@ -18,6 +18,7 @@ class NovelAICog(commands.Cog):
 
     @checks.is_allowed_guild()
     @commands.command(name='nai')
+    @MyLogger.log_command
     async def generate_with_nai(self, ctx, *args):
         """nai [positive_prompt] -u [negative_prompt] -m [model]"""
 

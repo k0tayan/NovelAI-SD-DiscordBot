@@ -24,10 +24,10 @@ class LinkExpand(commands.Cog):
     @checks.is_allowed_guild()
     @checks.is_nsfw()
     @commands.command(name='link')
+    @MyLogger.log_command
     async def link_expand(self, ctx: commands.Context, link: str):
         """link [link]"""
 
-        self.logger.info('Start link command')
         if not config['USE_WEBUI']:
             self.logger.info('WebUI is not enabled')
             return
