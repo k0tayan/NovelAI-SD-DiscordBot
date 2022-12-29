@@ -6,7 +6,6 @@ from utils.logger import MyLogger
 
 from backend import webui
 import base64
-import uuid
 import random
 import io
 

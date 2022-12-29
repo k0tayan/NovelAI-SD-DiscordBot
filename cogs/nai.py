@@ -6,7 +6,6 @@ from utils.logger import MyLogger
 
 from utils.prompt import parse_prompt_nai
 from backend import novelai
-import uuid
 import random
 import io
 
