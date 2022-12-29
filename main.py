@@ -10,6 +10,7 @@ COGS = [
     'cogs.locale',
     'cogs.help',
     'cogs.reaction',
+    'cogs.test',
 ]
 
 bot = commands.Bot(command_prefix='', help_command=None, intents=discord.Intents.all())
