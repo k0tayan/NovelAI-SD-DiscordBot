@@ -79,12 +79,15 @@ def parse_prompt(args: list) -> StableDiffusionPrompt:
     height = parse_option(args, '-h', config['HEIGHT'], lambda x: x % 64 == 0, ValueError({'message': 'HEIGHT_NOT_MULTIPLE_OF_64'}))
     batch_size = parse_option(args, '-b', config['BATCH_SIZE'])
     translate = parse_option(args, '-t')
+    quality_tag = parse_option(args, '-q')
     # negative_promptの処理
     n = (lambda x: x.index('-u') if '-u' in x else -1)(args)
     if n >= len(args)-1:
         raise ValueError({'message': 'INVALID_NEGATIVE_PROMPT'})
     negative_prompt = ' '.join("" if n == -1 else args[n+1:])
     _prompt = ' '.join(args if n == -1 else args[:n])
+    if quality_tag:
+        _prompt = "masterpiece, best quality, " + _prompt
     response = StableDiffusionPrompt(
         prompt=_prompt,
         negative_prompt=negative_prompt,

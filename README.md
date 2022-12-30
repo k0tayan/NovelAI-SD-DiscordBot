@@ -13,9 +13,10 @@ Discord Bot to generate images using StableDiffusion and NovelAI
 
 ## Command
 
-- `sd prompt -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size] -t(translate prompt)`
+- `sd prompt -u [negative_prompt] -s [steps] -c [scale] -w [width] -h [height] -b [batch_size] -t(translate prompt) -q(add quality tag)`
   - Generate images with stable-diffusion-webui
   - You must run stable-diffusion-webui with `--api` option in `COMMANDLINE_ARGS`
+  - quality tag: masterpiece, best quality,
 - `nai prompt -u [negative_prompt] -m [model]`
   - Generate images with NovelAI
   - model: 0=Curated, 1=Full
