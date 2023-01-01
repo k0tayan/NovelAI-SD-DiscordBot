@@ -35,6 +35,7 @@ class NovelAIPrompt:
     prompt: str
     negative_prompt: str
     model: int
+    quality_toggle: int
     original_prompt: str = None
     original_negative_prompt: str = None
 
@@ -104,6 +105,7 @@ def parse_prompt(args: list) -> StableDiffusionPrompt:
 def parse_prompt_nai(prompt: tuple) -> dict:
     prompt = list(prompt)
     model = parse_option(prompt, '-m', [0, 1, 0])
+    quality_toggle = parse_option(prompt, '-q', [0, 1, 1])
     # negative_promptの処理
     n = (lambda x: x.index('-u') if '-u' in x else -1)(prompt)
     if n >= len(prompt)-1:
@@ -113,7 +115,8 @@ def parse_prompt_nai(prompt: tuple) -> dict:
     response = NovelAIPrompt(
         prompt=_prompt,
         negative_prompt=negative_prompt,
-        model=model
+        model=model,
+        quality_toggle=quality_toggle
     )
     return response
 

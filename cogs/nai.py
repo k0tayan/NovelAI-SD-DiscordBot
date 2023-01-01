@@ -47,7 +47,8 @@ class NovelAICog(commands.Cog):
                 prompt=prompt.prompt,
                 resolution=(512, 768),
                 negative_prompt=prompt.negative_prompt,
-                is_safe=is_safe
+                is_safe=is_safe,
+                quality_toggle=bool(prompt.quality_toggle)
             )
             image_filename = self.logger.save_image(image_data)
             file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
