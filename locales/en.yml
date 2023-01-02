@@ -15,36 +15,36 @@ MESSAGE:
   GET_LOCALE: Current locale is en
   GET_LOCALES: The following locales can be selected
   HELP:
-    start: このbotは以下のコマンドが使えます
+    start: This bot can use the following commands
     sd: |-
-      `sd プロンプト`
-      stable-diffusion-webuiを用いて、プロンプトの内容で画像を生成します
-      以下のオプションがあります
-      -u [ネガティブプロンプト]
-      -s [ステップ数]
+      `sd prompt`
+      Generate images with the prompt content using stable-diffusion-webui
+      The following options are available
+      -u [negative prompt]
+      -s [steps]
       -c [CFG Scale]
-      -w [画像の幅]
-      -h [画像の高さ]
-      -b [バッチサイズ]
-      -t(翻訳するかどうか、しない場合はつけなくて良い)
-      -q(クオリティタグをつけるかどうか)
+      -w [width of image]
+      -h [height of image]
+      -b [batch size]
+      -t(Translate or not, if not, don't put it on.)
+      -q(Whether to add a quality tag or not)
     nai: |-
-      `nai プロンプト`
-      NovelAIを用いて、プロンプトの内容で画像を生成します
-      以下のオプションがあります
-      -u [ネガティブプロンプト]
+      `nai prompt`
+      Generate images with the prompt content using NovelAI
+      The following options are available
+      -u [negative prompt]
       -m [model]
       model: 0=Curated, 1=Full
-      FullはNSFWチャンネル専用です
+      Full is for NSFW channels only
     ele: |-
       `ele`
-      元素法典からランダムに選択した呪文で画像を生成します
+      Generates an image with a randomly selected spell from the Elemental Code
     locale: |-
       `locale [locale]`
-      言語を指定したロケールに設定します
+      Sets the language to the specified locale
     help: |-
       `help`
-      このメッセージを表示します
+      Show this message
 ERROR:
   INVALID_OPTION: <option> is invalid
   INVALID_OPTION_RANGE: <option> must be between <min>~<max>
