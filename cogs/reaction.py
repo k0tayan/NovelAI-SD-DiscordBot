@@ -15,10 +15,7 @@ class Reaction(commands.Cog):
             channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
             if message.author == self.bot.user:
-                if len(message.attachments) > 0:
-                    await message.delete()
-                else:
-                    await message.delete()
+                await message.delete()
 
 
 async def setup(bot):
