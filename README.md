@@ -1,6 +1,6 @@
 # NovelAI-SD-DiscordBot
 
-Discord Bot to generate images using StableDiffusion and NovelAI
+Discord Bot For StableDiffusion and NovelAI
 ![キャプチャ](https://user-images.githubusercontent.com/16555696/209456814-a87625a7-0091-4e4d-8b3e-3003d86426ac.PNG)
 
 ## Features
