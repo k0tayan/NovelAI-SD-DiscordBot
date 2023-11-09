@@ -16,16 +16,7 @@ google-cloud-translate = "^3.9.0"
 
 [tool.poetry.group.dev.dependencies]
 novelai-api = "^0.10.2"
-black = "^22.12.0"
-isort = "^5.11.4"
-mypy = "^0.991"
-pytest = "^7.2.0"
-pyproject-flake8 = "^6.0.0.post1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.flake8]
-max-line-length = 200
-max-complexity = 18
