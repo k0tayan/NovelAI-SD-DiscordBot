@@ -23,7 +23,9 @@ class API:
         from os import environ as env
 
         if "NAI_USERNAME" not in env or "NAI_PASSWORD" not in env:
-            raise RuntimeError("Please ensure that NAI_USERNAME and NAI_PASSWORD are set in your environment")
+            raise RuntimeError(
+                "Please ensure that NAI_USERNAME and NAI_PASSWORD are set in your environment"
+            )
 
         self._username = env["NAI_USERNAME"]
         self._password = env["NAI_PASSWORD"]

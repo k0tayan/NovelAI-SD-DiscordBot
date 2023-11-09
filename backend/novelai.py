@@ -2,7 +2,13 @@ from .boilerplate import API
 from novelai_api.ImagePreset import ImageModel, ImagePreset
 
 
-async def generate_image(prompt: str, resolution: tuple, negative_prompt: str, is_safe: bool = True, quality_toggle: bool = True) -> bytes:
+async def generate_image(
+    prompt: str,
+    resolution: tuple,
+    negative_prompt: str,
+    is_safe: bool = True,
+    quality_toggle: bool = True,
+) -> bytes:
     async with API() as api_handler:
         api = api_handler.api
         preset = ImagePreset()
