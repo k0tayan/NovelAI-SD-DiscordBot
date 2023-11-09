@@ -11,7 +11,7 @@ class Reaction(commands.Cog):
         # リアクションしたのが自分だったら無視
         if payload.user_id == self.bot.user.id:
             return
-        if payload.emoji.name == config['REACTION']['DELETE']:
+        if payload.emoji.name == config["REACTION"]["DELETE"]:
             channel = self.bot.get_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
             if message.author == self.bot.user:

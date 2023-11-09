@@ -3,11 +3,11 @@ from config.load_config import config
 import os
 import yaml
 
-_bot_locale_name = config['LOCALE']
+_bot_locale_name = config["LOCALE"]
 _locales = {}
-for i in os.listdir('locales'):
-    with open(f'locales/{i}', encoding='utf-8') as file:
-        _locales[i.strip('.yml')] = yaml.safe_load(file)
+for i in os.listdir("locales"):
+    with open(f"locales/{i}", encoding="utf-8") as file:
+        _locales[i.strip(".yml")] = yaml.safe_load(file)
 
 _user_locale = {}
 

@@ -17,13 +17,13 @@ class NovelAICog(commands.Cog):
         self.logger = MyLogger(__name__)
 
     @checks.is_allowed_guild()
-    @commands.command(name='nai')
+    @commands.command(name="nai")
     @MyLogger.log_command
     async def generate_with_nai(self, ctx, *args):
         """nai [positive_prompt] -u [negative_prompt] -m [model]"""
 
-        if not config['USE_NOVELAI']:
-            self.logger.info('NovelAI is not enabled')
+        if not config["USE_NOVELAI"]:
+            self.logger.info("NovelAI is not enabled")
             return
         user_locale = locale.get_user_locale(ctx.author.id)
         try:
@@ -33,27 +33,29 @@ class NovelAICog(commands.Cog):
                 await ctx.reply(e)
                 return
             if prompt.model == 1 and not ctx.channel.is_nsfw():
-                await ctx.reply(user_locale['ERROR']['NSFW_ONLY'])
+                await ctx.reply(user_locale["ERROR"]["NSFW_ONLY"])
                 return
             if not ctx.channel.is_nsfw():
                 # 強制的にNSFWを除外する
-                for ng in config['NSFW_EXCLUDE']:
+                for ng in config["NSFW_EXCLUDE"]:
                     prompt.prompt = prompt.prompt.replace(ng, "")
-                prompt.negative_prompt += '(((nsfw)))'
+                prompt.negative_prompt += "(((nsfw)))"
             self.logger.info(str(prompt))
             is_safe = prompt.model == 0
-            await ctx.reply(random.choice(user_locale['MESSAGE']['RESPONSE']))
+            await ctx.reply(random.choice(user_locale["MESSAGE"]["RESPONSE"]))
             image_data = await novelai.generate_image(
                 prompt=prompt.prompt,
                 resolution=(512, 768),
                 negative_prompt=prompt.negative_prompt,
                 is_safe=is_safe,
-                quality_toggle=bool(prompt.quality_toggle)
+                quality_toggle=bool(prompt.quality_toggle),
             )
             image_filename = self.logger.save_image(image_data)
-            file = discord.File(io.BytesIO(image_data), filename=f'{image_filename}.jpg')
+            file = discord.File(
+                io.BytesIO(image_data), filename=f"{image_filename}.jpg"
+            )
             message = await ctx.reply(file=file)
-            await message.add_reaction(config['REACTION']['DELETE'])
+            await message.add_reaction(config["REACTION"]["DELETE"])
         except Exception as e:
             self.logger.error(e)
 

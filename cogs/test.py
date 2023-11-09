@@ -8,12 +8,12 @@ class Test(commands.Cog):
 
         self.logger = MyLogger(__name__)
 
-    @commands.command(name='test')
+    @commands.command(name="test")
     @MyLogger.log_command
     async def test(self, ctx: commands.Context, *args):
         """Test command."""
 
-        await ctx.reply('test')
+        await ctx.reply("test")
 
 
 async def setup(bot):
