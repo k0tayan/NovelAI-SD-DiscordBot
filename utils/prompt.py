@@ -1,10 +1,10 @@
-from config.load_config import config
-
 from collections.abc import Callable
-from dotenv import load_dotenv
-
-from google.cloud import translate
 from dataclasses import dataclass
+
+from dotenv import load_dotenv
+from google.cloud import translate
+
+from config.load_config import config
 
 load_dotenv()
 

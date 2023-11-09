@@ -1,5 +1,6 @@
-from config.load_config import config
 import aiohttp
+
+from config.load_config import config
 
 
 async def generate_image(

@@ -1,10 +1,11 @@
-from config.load_config import config
+import asyncio
+import os
+from logging import DEBUG, Formatter, StreamHandler, getLogger
+
 import discord
 from discord.ext import commands
 
-from logging import getLogger, StreamHandler, DEBUG, Formatter
-import os
-import asyncio
+from config.load_config import config
 
 COGS = [
     "cogs.locale",

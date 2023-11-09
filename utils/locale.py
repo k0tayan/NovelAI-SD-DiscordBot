@@ -1,7 +1,8 @@
-from config.load_config import config
-
 import os
+
 import yaml
+
+from config.load_config import config
 
 _bot_locale_name = config["LOCALE"]
 _locales = {}

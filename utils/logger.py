@@ -1,8 +1,9 @@
-from config.load_config import config
-from discord.ext import commands
 import logging
-
 import uuid
+
+from discord.ext import commands
+
+from config.load_config import config
 
 
 class MyLogger(logging.Logger):

@@ -1,13 +1,14 @@
-from config.load_config import config
+import io
+import random
+
 import discord
 from discord.ext import commands
-from utils import locale, checks
-from utils.logger import MyLogger
 
-from utils.prompt import parse_prompt_nai, NovelAIPrompt
 from backend import novelai
-import random
-import io
+from config.load_config import config
+from utils import checks, locale
+from utils.logger import MyLogger
+from utils.prompt import NovelAIPrompt, parse_prompt_nai
 
 
 class NovelAICog(commands.Cog):

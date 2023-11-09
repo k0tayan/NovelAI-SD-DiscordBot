@@ -1,16 +1,17 @@
-from config.load_config import config
-import discord
-from discord.ext import commands
-from utils import locale, checks
-from utils.logger import MyLogger
-
-from utils.prompt import parse_prompt, StableDiffusionPrompt
-from backend import webui
 import base64
-import random
 import io
 import json
 import os
+import random
+
+import discord
+from discord.ext import commands
+
+from backend import webui
+from config.load_config import config
+from utils import checks, locale
+from utils.logger import MyLogger
+from utils.prompt import StableDiffusionPrompt, parse_prompt
 
 
 class StableDiffusionCog(commands.Cog):

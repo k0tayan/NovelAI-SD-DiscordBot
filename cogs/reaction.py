@@ -1,5 +1,6 @@
-from config.load_config import config
 from discord.ext import commands
+
+from config.load_config import config
 
 
 class Reaction(commands.Cog):

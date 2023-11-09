@@ -1,5 +1,6 @@
-from .boilerplate import API
 from novelai_api.ImagePreset import ImageModel, ImagePreset
+
+from .boilerplate import API
 
 
 async def generate_image(
